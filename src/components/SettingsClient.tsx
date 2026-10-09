@@ -25,6 +25,15 @@ const FIELDS: { section: string; key: string; label: string; placeholder?: strin
   { section: 'payments', key: 'bank_account_number', label: 'Account number', placeholder: '0000000000' },
 
   { section: 'email', key: 'email_from', label: 'From address', placeholder: 'Project 1 <orders@beatvault.gh>' },
+
+  { section: 'studio', key: 'studio_bookable', label: 'Online booking', placeholder: '1', help: '1 = artists can book and pay a deposit. 0 = booking form is closed.' },
+  { section: 'studio', key: 'studio_deposit_percent', label: 'Deposit to lock a slot (%)', placeholder: '50', help: 'Artists pay this share now and the balance at the studio. 50 = half.' },
+  { section: 'studio', key: 'studio_open_hour', label: 'First session hour (24h)', placeholder: '10' },
+  { section: 'studio', key: 'studio_close_hour', label: 'Last session hour (24h)', placeholder: '18' },
+  { section: 'studio', key: 'studio_open_days', label: 'Open days', placeholder: '1-6', help: 'Monday = 1, Sunday = 0. Use 0-6 for every day.' },
+  { section: 'studio', key: 'studio_address', label: 'Studio address', placeholder: 'Osu, Accra' },
+  { section: 'studio', key: 'studio_phone', label: 'Studio phone', placeholder: '+233 55 000 0000' },
+  { section: 'studio', key: 'studio_policy', label: 'Booking policy', placeholder: 'Arrive 10 minutes early…', type: 'textarea' },
 ];
 
 const SECTIONS = [
@@ -33,6 +42,7 @@ const SECTIONS = [
   { id: 'Currency', title: 'Currency', sub: 'How prices are displayed and charged.' },
   { id: 'payments', title: 'Payments & payouts', sub: 'Connect Paystack to take real Mobile Money and bank payments.' },
   { id: 'email', title: 'Email', sub: 'Sender identity for delivery emails.' },
+  { id: 'studio', title: 'Studio bookings', sub: 'Deposit share, opening hours and the policy shown on every booking.' },
 ];
 
 export default function SettingsClient({

@@ -19,13 +19,25 @@ Built with Next.js 14 (App Router), Tailwind CSS, SQLite and Paystack.
 - **Artists & subscribers** — who bought what, and lifetime spend
 - **Message inbox** — read enquiries and reply; the reply is emailed to the artist
 - **Email outbox** — every message the site composed, previewable as HTML
-- **Settings** — brand, hero copy, currency, Paystack keys, bank + MoMo details
+- **Studio calendar** (`/admin/bookings`) — every slot an artist has locked, who owes what on the
+  day, mark a cash/MoMo deposit as received, complete, cancel or refund, resend the confirmation
+- **Studio rates** — hourly price, min/max length and what is included per bookable service, on the
+  same page under "Rates"
+- **Settings** — brand, hero copy, currency, Paystack keys, bank + MoMo details, booking deposit %,
+  opening hours, closed days and the studio policy
 
 ### For artists
 - Create an account, log in, keep a permanent **library** of everything bought
 - Preview every beat inline before buying
+- **`/previews`** — every beat preview listed as one playable queue (tagged clip first, master
+  when no clip was cut), with "play every preview" to audition the whole catalogue back to back
+- The hero player carries the same queue, so the full catalogue is clickable from the homepage
 - Cart + checkout with **Mobile Money (MTN / Vodafone / AirtelTigo)**, **bank transfer** or **card**
 - Files **emailed instantly** plus re-downloadable from `/dashboard/library`
+- **`/studio`** — book a recording / mixing / mastering slot and pay **only the deposit** (50% by
+  default) with Mobile Money or card to lock it; the balance is settled at the studio
+- `/dashboard/studio` — upcoming and past sessions, the ICS calendar file, pay an unpaid deposit,
+  release a hold; `https://…/studio/booking/<reference>` is the same receipt for anyone off the email link
 - Message the producer and read replies in-thread
 
 ### Automation
@@ -111,6 +123,48 @@ the buyer picks one at checkout and it is recorded on the order.
 
 ---
 
+## 🎙 Studio bookings — half now, half at the studio
+
+`/studio` is a five-step booking flow modelled on the way producers actually run a room: pick a
+service, pick a date and how many hours, tap a free start time, leave notes for the engineer, then
+pay a **deposit** — 50% by default — to lock the slot. Everything else about the money path is the
+same engine the beat store already uses (Paystack, idempotent completion, demo checkout when no keys
+are set).
+
+```
+artist on /studio ──▶ POST /api/studio/book      (re-priced from the DB, slot held as `pending`)
+                          │
+                          ├─ demo mode / "hold my slot" ──▶ /studio/confirm?reference=BK-…
+                          └─ live ──▶ Paystack (amount = deposit only) ──▶ /studio/confirm?reference=BK-…
+                                          │
+              webhook `charge.success` ───┤  references starting BK- go to completeBooking()
+                                          ▼
+                          deposit_paid · receipt email · producer notified with the balance owed
+```
+
+**Rules the engine enforces** (all re-checked server-side, never trusted from the client):
+
+| Rule | Where it comes from |
+| --- | --- |
+| Hourly rate × hours = price, deposit = `studio_deposit_percent`% | `bookings.price / deposit / balance` |
+| Session must fit inside `studio_open_hour`–`studio_close_hour` | `availability()` |
+| Closed days are not bookable | `studio_open_days` (Sunday = 0, `1-6` = Mon–Sat) |
+| A slot overlaps nobody — holds count too, studio-wide not per service | `takenRanges()` |
+| Same-day starts inside 2 hours are hidden | `slotInPast()` |
+| An unpaid hold dies after 45 minutes and the slot returns | `releaseStaleHolds()` |
+
+Statuses: `pending → deposit_paid → confirmed → completed`, with `cancelled`, `refunded` and
+`expired` for the ones that never happened. The balance is deliberately **not** charged online: it
+is collected at the studio, and `Admin → Studio` is where the producer marks a deposit or a full
+payment as received (which emails the artist a receipt too).
+
+Settings live in `Admin → Settings → Studio bookings`: `studio_bookable` (kill switch),
+`studio_deposit_percent`, `studio_open_hour`, `studio_close_hour`, `studio_open_days`,
+`studio_address`, `studio_phone`, `studio_policy`. Services are priced in `Admin → Studio → Rates`,
+and a service with no rate falls back to an enquiry link instead of a payment button.
+
+---
+
 ## 📧 Email delivery
 
 Delivery emails are **always composed**. Whether they are actually sent depends on SMTP:
@@ -169,6 +223,7 @@ src/
   app/
     page.tsx                 animated homepage / hero
     beats/                   catalogue + beat detail
+    previews/                every beat preview, listed as one queue
     videos/  about/  contact/  licensing/
     login/  register/        artist auth
     dashboard/               artist library, messages, account

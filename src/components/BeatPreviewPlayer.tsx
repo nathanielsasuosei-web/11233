@@ -32,10 +32,13 @@ export default function BeatPreviewPlayer({
   src,
   title,
   beatId,
+  label = 'tagged preview · 30s',
 }: {
   src?: string;
   title: string;
   beatId?: number;
+  /** What the visitor is hearing — tagged clip or full master. */
+  label?: string;
 }) {
   const ref = useRef<HTMLAudioElement>(null);
   const counted = useRef(false);
@@ -144,9 +147,7 @@ export default function BeatPreviewPlayer({
           </div>
           <div className="mt-1.5 flex items-center justify-between text-[10px] font-semibold tabular-nums uppercase tracking-[.12em] text-white/35">
             <span>{fmt(time)}</span>
-            <span className="text-white/25">
-              {err ? 'preview unavailable' : 'tagged preview · 30s'}
-            </span>
+            <span className="text-white/25">{err ? 'preview unavailable' : label}</span>
             <span>{dur ? fmt(dur) : '0:00'}</span>
           </div>
         </div>

@@ -7,6 +7,7 @@ import Reveal from '@/components/Reveal';
 import VideoModalTrigger from '@/components/VideoModalTrigger';
 import BeatPreviewPlayer from '@/components/BeatPreviewPlayer';
 import { getBeatBySlug, listBeats, relatedBeats } from '@/lib/queries';
+import { previewLabel, previewSrc } from '@/lib/preview';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +77,12 @@ export default function BeatDetailPage({ params }: Props) {
               </div>
             </div>
 
-            <BeatPreviewPlayer src={beat.preview_url || beat.audio_url} title={beat.title} beatId={beat.id} />
+            <BeatPreviewPlayer
+              src={previewSrc(beat)}
+              title={beat.title}
+              beatId={beat.id}
+              label={previewLabel(beat)}
+            />
 
             {beat.video_url && (
               <div className="mt-4">
