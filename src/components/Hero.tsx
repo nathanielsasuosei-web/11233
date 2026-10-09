@@ -35,21 +35,8 @@ export default function Hero({
         <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_.9fr]">
           <div>
             <div
-              className="animate-fade-up inline-flex items-center gap-2.5 rounded-full border border-brand-500/30 bg-brand-950/50 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-brand-200 backdrop-blur"
+              className="animate-fade-up mb-8 flex flex-wrap items-center gap-3"
               style={{ animationDelay: '60ms' }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
-              </span>
-              New drops every Friday · Instant delivery
-            </div>
-
-
-
-            <div
-              className="animate-fade-up mt-9 flex flex-wrap items-center gap-3"
-              style={{ animationDelay: '1000ms' }}
             >
               <Link href="/beats" className="btn-red !px-8 !py-4 text-sm">
                 Browse {stats.beats} beats
@@ -65,6 +52,17 @@ export default function Hero({
                 </span>
                 Watch showreel
               </button>
+            </div>
+
+            <div
+              className="animate-fade-up inline-flex items-center gap-2.5 rounded-full border border-brand-500/30 bg-brand-950/50 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-brand-200 backdrop-blur"
+              style={{ animationDelay: '60ms' }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
+              </span>
+              New drops every Friday · Instant delivery
             </div>
 
             <dl
