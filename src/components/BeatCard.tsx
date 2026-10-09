@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { claimAudio, releaseAudio, stopAllAudio } from '@/lib/audioBus';
+import { claimAudio, onAudioChange, releaseAudio } from '@/lib/audioBus';
+import { isTaggedPreview, previewLabel, previewSrc } from '@/lib/preview';
 import { LICENSES, priceFor } from '@/lib/utils';
 import { useCart } from './CartProvider';
 import { useMoney } from './SettingsProvider';
@@ -89,7 +90,8 @@ export default function BeatCard({
   const money = useMoney();
   const toast = useToast();
 
-  const src = beat.preview_url || beat.audio_url || '';
+  // Tagged clip when there is one, master otherwise — never "unplayable" for no reason.
+  const src = previewSrc(beat);
 
   useEffect(() => {
     const a = audioRef.current;
@@ -110,6 +112,18 @@ export default function BeatCard({
       releaseAudio(a);
     };
   }, []);
+
+  // Another preview grabbed the speakers, so this one is silent — update the UI.
+  useEffect(
+    () =>
+      onAudioChange((el) => {
+        if (el !== audioRef.current) {
+          setPlaying(false);
+          setTime(0);
+        }
+      }),
+    [],
+  );
 
   function toggle() {
     const a = audioRef.current;
@@ -217,9 +231,9 @@ export default function BeatCard({
 
         {/* scrubber */}
         <div className="absolute inset-x-3 bottom-3">
-          <div className="mb-1 flex items-center justify-between text-[10px] font-semibold tabular-nums text-white/55">
+          <div className="mb-1 flex items-center justify-between gap-2 text-[10px] font-semibold tabular-nums text-white/55">
             <span>{fmtTime(time)}</span>
-            <span>{playing ? fmtTime(duration) : beat.musical_key || ''}</span>
+            <span className="truncate">{playing ? fmtTime(duration) : beat.musical_key || ''}</span>
           </div>
           <input
             type="range"
@@ -232,6 +246,11 @@ export default function BeatCard({
             style={{ opacity: playing ? 1 : undefined }}
             aria-label="Seek preview"
           />
+          {!isTaggedPreview(beat) && (
+            <div className="mt-1 truncate text-center text-[8px] font-bold uppercase tracking-[.16em] text-white/35">
+              {src ? previewLabel(beat) : 'no preview uploaded'}
+            </div>
+          )}
         </div>
       </div>
 

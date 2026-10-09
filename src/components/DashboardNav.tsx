@@ -8,6 +8,7 @@ import { useToast } from './Toast';
 const LINKS = [
   { href: '/dashboard', label: 'Overview', icon: '◎' },
   { href: '/dashboard/library', label: 'My beats', icon: '🎧' },
+  { href: '/dashboard/studio', label: 'Studio bookings', icon: '🎙️' },
   { href: '/dashboard/messages', label: 'Messages', icon: '✉️' },
   { href: '/dashboard/account', label: 'Account', icon: '⚙' },
 ];

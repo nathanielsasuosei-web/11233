@@ -7,6 +7,20 @@
     'Noto Sans', sans-serif;
   --font-display: 'Archivo Black', 'Arial Black', 'Helvetica Neue', Impact, ui-sans-serif, system-ui,
     sans-serif;
+  /* Native form controls (date pickers, scrollbars, autofill) follow the dark UI. */
+  color-scheme: dark;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='time']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+input[type='date']:hover::-webkit-calendar-picker-indicator,
+input[type='time']:hover::-webkit-calendar-picker-indicator {
+  opacity: 0.95;
 }
 
 * {

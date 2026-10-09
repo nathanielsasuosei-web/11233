@@ -15,7 +15,10 @@ export type EmailKind =
   | 'contact'
   | 'message_reply'
   | 'broadcast'
-  | 'admin_notice';
+  | 'admin_notice'
+  | 'booking_receipt'
+  | 'booking_pending'
+  | 'booking_cancelled';
 
 export function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER);
@@ -199,5 +202,92 @@ export function replyEmail(opts: { name: string; subject: string; reply: string;
     <div style="background:#16161b;border-left:3px solid #ff2d3a;border-radius:8px;padding:18px;font-size:15px;line-height:1.75;color:#fff;white-space:pre-wrap;">${escapeHtml(opts.reply)}</div>
     <div style="margin-top:26px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#8a8a95;">Your original message</div>
     <div style="margin-top:8px;font-size:14px;line-height:1.7;color:#8a8a95;white-space:pre-wrap;">${escapeHtml(opts.original)}</div>`,
+  });
+}
+
+export function bookingReceiptEmail(opts: {
+  name: string;
+  reference: string;
+  service: string;
+  date: string;
+  start: string;
+  end: string;
+  hours: number;
+  total: string;
+  deposit: string;
+  balance: string;
+  method: string;
+  address: string;
+  policy: string;
+  manageUrl: string;
+}) {
+  const studio = getSetting('studio_name');
+  const body = `${h1(`Your ${escapeHtml(opts.service.toLowerCase())} session is locked, ${escapeHtml(opts.name.split(' ')[0])} 🎙️`)}
+  ${p(`Your deposit cleared, so <strong>${escapeHtml(opts.date)} at ${escapeHtml(opts.start)}</strong> is yours. Nobody else can take that slot.`)}
+  ${metaTable([
+    ['Booking reference', escapeHtml(opts.reference)],
+    ['Session', `${opts.hours} hour${opts.hours === 1 ? '' : 's'} · ${escapeHtml(opts.start)}–${escapeHtml(opts.end)}`],
+    ['Session total', escapeHtml(opts.total)],
+    ['Deposit paid', escapeHtml(opts.deposit)],
+    ['Balance due at the studio', escapeHtml(opts.balance)],
+    ['Paid with', escapeHtml(opts.method)],
+  ])}
+  ${opts.address ? p(`<strong>Where:</strong> ${escapeHtml(opts.address)}`) : ''}
+  ${p(`<strong>Policy:</strong> ${escapeHtml(opts.policy)}`)}
+  ${button(opts.manageUrl, 'View my booking')}}`;
+
+  return shell({
+    title: `Booking confirmed — ${opts.reference}`,
+    preheader: `${opts.service} on ${opts.date} at ${opts.start}. Balance ${opts.balance} at the studio.`,
+    body,
+  });
+}
+
+export function bookingPendingEmail(opts: {
+  name: string;
+  reference: string;
+  service: string;
+  date: string;
+  start: string;
+  hours: number;
+  deposit: string;
+  total: string;
+  payUrl: string;
+}) {
+  const body = `${h1(`Hold your ${escapeHtml(opts.service.toLowerCase())} slot, ${escapeHtml(opts.name.split(' ')[0])}`)}
+  ${p(`We are holding <strong>${escapeHtml(opts.date)} at ${escapeHtml(opts.start)}</strong> for a short while. Pay the deposit to lock it — the rest is settled at the studio.`)}
+  ${metaTable([
+    ['Booking reference', escapeHtml(opts.reference)],
+    ['Session', `${opts.hours} hour${opts.hours === 1 ? '' : 's'} of ${escapeHtml(opts.service)}`],
+    ['Session total', escapeHtml(opts.total)],
+    ['Deposit now', escapeHtml(opts.deposit)],
+  ])}
+  ${button(opts.payUrl, `Pay the ${escapeHtml(opts.deposit)} deposit`)}`;
+
+  return shell({
+    title: `Finish booking your studio slot`,
+    preheader: `${opts.service} on ${opts.date} at ${opts.start} — deposit ${opts.deposit}.`,
+    body,
+  });
+}
+
+export function bookingCancelledEmail(opts: {
+  name: string;
+  reference: string;
+  service: string;
+  date: string;
+  start: string;
+  reason: string;
+  depositState: string;
+}) {
+  const body = `${h1(`Booking ${escapeHtml(opts.reference)} is cancelled`)}
+  ${p(`Your ${escapeHtml(opts.service.toLowerCase())} slot on <strong>${escapeHtml(opts.date)} at ${escapeHtml(opts.start)}</strong> has been released.`)}
+  ${opts.reason ? p(`<strong>Reason:</strong> ${escapeHtml(opts.reason)}`) : ''}
+  ${p(`<strong>Deposit:</strong> ${escapeHtml(opts.depositState)}`)}`;
+
+  return shell({
+    title: `Booking cancelled — ${opts.reference}`,
+    preheader: 'Your studio slot has been released.',
+    body,
   });
 }

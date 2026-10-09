@@ -11,13 +11,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const unread = get<{ c: number }>("SELECT COUNT(*) c FROM messages WHERE status = 'unread'");
   const pending = get<{ c: number }>("SELECT COUNT(*) c FROM orders WHERE status = 'pending'");
+  const holds = get<{ c: number }>(
+    "SELECT COUNT(*) c FROM bookings WHERE status = 'pending' OR (status IN ('deposit_paid','confirmed') AND session_date >= date('now'))",
+  );
 
   return (
     <div className="container-x py-10 sm:py-14">
       <div className="flex gap-10">
         <AdminNav
           name={admin!.name}
-          badges={{ messages: unread?.c || 0, orders: pending?.c || 0 }}
+          badges={{ messages: unread?.c || 0, orders: pending?.c || 0, bookings: holds?.c || 0 }}
         />
         <div className="min-w-0 flex-1">{children}</div>
       </div>

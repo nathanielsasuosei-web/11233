@@ -9,15 +9,19 @@ import VideoModal from './VideoModal';
 export default function Hero({
   settings,
   beat,
+  tracks = [],
   showreelUrl,
   stats,
 }: {
   settings: Record<string, string>;
   beat: HeroBeat | null;
+  /** Every beat preview, listed as a queue under the player. */
+  tracks?: HeroBeat[];
   showreelUrl: string;
   stats: { beats: number; artists: number; sold: number };
 }) {
   const [video, setVideo] = useState(false);
+  const playerBeat = beat || tracks[0] || null;
 
   return (
     <section className="relative min-h-[100svh] overflow-hidden bg-ink-900">
@@ -86,10 +90,10 @@ export default function Hero({
             </dl>
           </div>
 
-          {beat && (
+          {playerBeat && (
             <div className="animate-fade-up lg:pl-6" style={{ animationDelay: '640ms' }}>
               <div className="animate-float">
-                <HeroPlayer beat={beat} />
+                <HeroPlayer beat={playerBeat} tracks={tracks} />
               </div>
             </div>
           )}

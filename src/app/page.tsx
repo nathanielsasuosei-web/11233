@@ -6,36 +6,9 @@ import Reveal from '@/components/Reveal';
 import VideoCard from '@/components/VideoCard';
 import { getSettings } from '@/lib/db';
 import { listBeats, listVideos, siteStats } from '@/lib/queries';
-
-const STUDIO_SERVICES = [
-  {
-    number: '01',
-    title: 'Recording',
-    label: 'Capture the performance',
-    icon: 'recording' as const,
-    description:
-      'Get a clear, confident vocal take with focused tracking, punch-ins, and take comping shaped around your performance.',
-    details: ['Vocal tracking', 'Punch-ins', 'Take comping'],
-  },
-  {
-    number: '02',
-    title: 'Mixing',
-    label: 'Bring every layer into focus',
-    icon: 'mixing' as const,
-    description:
-      'Balance vocals and instruments, shape space and detail, and make every element work together as one record.',
-    details: ['Vocal balance', 'Depth & clarity', 'Mix revisions'],
-  },
-  {
-    number: '03',
-    title: 'Mastering',
-    label: 'Finish it for release',
-    icon: 'mastering' as const,
-    description:
-      'Add the final tonal and loudness polish so your track feels cohesive and translates across listening systems.',
-    details: ['Final polish', 'Streaming-ready', 'Release check'],
-  },
-];
+import { playableBeats } from '@/lib/preview';
+import { depositPercent, listStudioServices, servicePriceSummary } from '@/lib/studio';
+import { formatMoney } from '@/lib/utils';
 
 function StudioServiceIcon({ name }: { name: 'recording' | 'mixing' | 'mastering' }) {
   return (
@@ -71,35 +44,72 @@ export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   const settings = getSettings();
-  const featured = listBeats({ featured: true, limit: 8 });
-  const fresh = listBeats({ limit: 8 });
+  // No cap: every published beat is listed, so every preview is reachable here.
+  // listBeats() sorts featured first, so the highlights still lead the grid.
+  const beats = listBeats();
+  const previews = playableBeats(beats);
   const videos = listVideos(3);
   const stats = siteStats();
-  const heroBeat = featured[0] || fresh[0] || null;
+  const heroBeat = beats.find((b) => b.featured) || beats[0] || null;
+  const percent = depositPercent();
+  // One source of truth for studio pricing: the same rows the booking engine uses.
+  const services = listStudioServices()
+    .filter((sv) => sv.published)
+    .map((sv, i) => {
+      const summary = servicePriceSummary(sv);
+      return {
+        id: sv.id,
+        slug: sv.slug,
+        number: String(i + 1).padStart(2, '0'),
+        icon: sv.icon,
+        title: sv.title,
+        description: sv.blurb,
+        rate: sv.price_per_hour
+          ? `${formatMoney(sv.price_per_hour, settings.currency_symbol)} per hour · ${summary.hours}`
+          : 'Quoted per project',
+        details: (sv.includes || '')
+          .split('|')
+          .map((x) => x.trim())
+          .filter(Boolean),
+        bookLabel:
+          sv.price_per_hour && summary.depositFrom
+            ? `Book ${sv.title} · ${formatMoney(summary.depositFrom, settings.currency_symbol)} down`
+            : `Ask about ${sv.title}`,
+        bookable: Boolean(sv.price_per_hour),
+      };
+    });
 
   return (
     <>
       <Hero
         settings={settings}
         beat={heroBeat}
+        tracks={previews}
         showreelUrl={videos[0]?.video_url || ''}
         stats={stats}
       />
 
-      {/* ---------------- featured ---------------- */}
+      {/* ---------------- every beat ---------------- */}
       <section className="container-x py-20 sm:py-28">
         <SectionHeading
-          eyebrow="Hand-picked"
-          title="Featured"
-          accent="instrumentals"
-          sub="The ones artists keep coming back for. Every beat is mixed and mastered, ready for your vocals."
+          eyebrow="The full catalogue"
+          title="Every"
+          accent="instrumental"
+          sub={`${beats.length} beat${beats.length === 1 ? '' : 's'} listed with a playable preview${
+            previews.length !== beats.length ? ` (${previews.length} with audio uploaded so far)` : ''
+          }. Hit play on any cover, then pick the licence that fits your release.`}
           action={
-            <Link href="/beats" className="btn-ghost !px-6 !py-3 text-xs">
-              View all beats →
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/previews" className="btn-red !px-6 !py-3 text-xs">
+                Preview list →
+              </Link>
+              <Link href="/beats" className="btn-ghost !px-6 !py-3 text-xs">
+                View all beats →
+              </Link>
+            </div>
           }
         />
-        <BeatGrid beats={featured.length ? featured : fresh} />
+        <BeatGrid beats={beats} />
       </section>
 
       {/* ---------------- videos ---------------- */}
@@ -140,24 +150,29 @@ export default function HomePage() {
             eyebrow="Studio services"
             title="From first take to"
             accent="final master"
-            sub="Recording, mixing and mastering for artists who want their records to feel finished and release-ready."
+            sub={`Recording, mixing and mastering for artists who want their records to feel finished and release-ready. Pay ${percent}% to lock a slot and settle the balance at the studio.`}
+            action={
+              <Link href="/studio" className="btn-ghost !px-6 !py-3 text-xs">
+                Studio calendar →
+              </Link>
+            }
           />
 
           <div className="grid gap-4 md:grid-cols-3">
-            {STUDIO_SERVICES.map((service, index) => (
+            {services.map((service, index) => (
               <Reveal key={service.title} delay={index * 90}>
                 <article className="group relative h-full overflow-hidden rounded-2xl border border-white/[.08] bg-black/[.35] p-6 transition-all duration-500 hover:-translate-y-1 hover:border-brand-500/30 hover:bg-ink-850/80">
                   <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-brand-600/10 blur-3xl transition-colors duration-500 group-hover:bg-brand-500/20" />
                   <div className="relative flex items-center justify-between">
                     <span className="grid h-12 w-12 place-items-center rounded-xl border border-brand-500/20 bg-brand-950/40 text-brand-300 transition-colors group-hover:border-brand-500/40 group-hover:bg-brand-950/70">
-                      <StudioServiceIcon name={service.icon} />
+                      <StudioServiceIcon name={service.icon as 'recording' | 'mixing' | 'mastering'} />
                     </span>
                     <span className="display text-3xl text-white/15 transition-colors group-hover:text-brand-500/35">
                       {service.number}
                     </span>
                   </div>
                   <div className="relative mt-7 text-[10px] font-bold uppercase tracking-[.18em] text-brand-300">
-                    {service.label}
+                    {service.rate}
                   </div>
                   <h3 className="display relative mt-2 text-2xl text-white">{service.title}</h3>
                   <p className="relative mt-3 min-h-[72px] text-sm leading-6 text-white/50">
@@ -170,16 +185,30 @@ export default function HomePage() {
                       </span>
                     ))}
                   </div>
-                  <Link
-                    href={`/contact?service=${service.title.toLowerCase()}`}
-                    aria-label={`Enquire about ${service.title}`}
-                    className="btn-ghost relative mt-6 w-full !justify-between !rounded-xl !px-4 !py-3 text-xs"
-                  >
-                    Enquire about {service.title}
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M5 12h14M13 6l6 6-6 6" />
-                    </svg>
-                  </Link>
+                  <div className="relative mt-6 flex flex-wrap gap-2">
+                    <Link
+                      href={service.bookable ? `/studio?service=${service.slug}` : `/contact?service=${service.title.toLowerCase()}`}
+                      aria-label={
+                        service.bookable
+                          ? `Book a ${service.title} session`
+                          : `Enquire about ${service.title}`
+                      }
+                      className="btn-red flex-1 !justify-between !rounded-xl !px-4 !py-3 text-xs"
+                    >
+                      {service.bookLabel}
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </Link>
+                    {service.bookable && (
+                      <Link
+                        href={`/contact?service=${service.title.toLowerCase()}`}
+                        className="btn-ghost !rounded-xl !px-4 !py-3 text-xs"
+                      >
+                        Ask a question
+                      </Link>
+                    )}
+                  </div>
                 </article>
               </Reveal>
             ))}
