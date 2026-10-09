@@ -8,6 +8,8 @@ import { useCart } from './CartProvider';
 import { useMoney } from './SettingsProvider';
 import { useToast } from './Toast';
 
+export type BeatLayout = 'grid' | 'list';
+
 export type BeatLite = {
   id: number;
   slug: string;
@@ -71,7 +73,13 @@ export function CoverArt({ beat, className = '' }: { beat: BeatLite; className?:
   );
 }
 
-export default function BeatCard({ beat }: { beat: BeatLite }) {
+export default function BeatCard({
+  beat,
+  layout = 'grid',
+}: {
+  beat: BeatLite;
+  layout?: BeatLayout;
+}) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -150,10 +158,18 @@ export default function BeatCard({ beat }: { beat: BeatLite }) {
   );
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/[.07] bg-ink-850 transition-all duration-500 hover:-translate-y-1 hover:border-brand-500/40 hover:shadow-[0_24px_60px_-30px_rgba(255,45,58,.55)]">
+    <div
+      className={`group relative rounded-2xl border border-white/[.07] bg-ink-850 transition-all duration-500 hover:-translate-y-1 hover:border-brand-500/40 hover:shadow-[0_24px_60px_-30px_rgba(255,45,58,.55)] ${
+        layout === 'list' ? 'flex items-center overflow-visible' : 'overflow-hidden'
+      }`}
+    >
       {src && <audio ref={audioRef} src={src} preload="none" />}
 
-      <div className="relative aspect-square overflow-hidden bg-ink-900">
+      <div
+        className={`relative aspect-square overflow-hidden bg-ink-900 ${
+          layout === 'list' ? 'w-28 shrink-0 rounded-l-[15px] sm:w-36 lg:w-40' : ''
+        }`}
+      >
         <CoverArt
           beat={beat}
           className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
@@ -176,7 +192,9 @@ export default function BeatCard({ beat }: { beat: BeatLite }) {
         <button
           onClick={toggle}
           aria-label={playing ? 'Pause preview' : 'Play preview'}
-          className={`absolute left-1/2 top-1/2 grid h-16 w-16 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-white transition-all duration-300 ${
+          className={`absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-white transition-all duration-300 ${
+            layout === 'list' ? 'h-12 w-12' : 'h-16 w-16'
+          } ${
             playing
               ? 'scale-100 bg-brand-500 shadow-[0_0_50px_-6px_rgba(255,45,58,.9)]'
               : 'scale-90 bg-black/45 opacity-90 backdrop-blur hover:scale-100 hover:bg-brand-500 group-hover:opacity-100'
@@ -217,7 +235,13 @@ export default function BeatCard({ beat }: { beat: BeatLite }) {
         </div>
       </div>
 
-      <div className="p-4">
+      <div
+        className={`min-w-0 ${
+          layout === 'list'
+            ? 'flex flex-1 flex-col justify-between self-stretch p-3 sm:p-4'
+            : 'p-4'
+        }`}
+      >
         <Link href={`/beats/${beat.slug}`} className="block">
           <h3 className="truncate text-[15px] font-bold text-white transition group-hover:text-brand-300">
             {beat.title}

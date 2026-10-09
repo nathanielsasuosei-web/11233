@@ -1,7 +1,13 @@
-import BeatCard, { type BeatLite } from './BeatCard';
+import BeatCard, { type BeatLayout, type BeatLite } from './BeatCard';
 import Reveal from './Reveal';
 
-export default function BeatGrid({ beats }: { beats: BeatLite[] }) {
+export default function BeatGrid({
+  beats,
+  layout = 'grid',
+}: {
+  beats: BeatLite[];
+  layout?: BeatLayout;
+}) {
   if (!beats.length) {
     return (
       <div className="card grid place-items-center px-6 py-20 text-center">
@@ -15,11 +21,12 @@ export default function BeatGrid({ beats }: { beats: BeatLite[] }) {
       </div>
     );
   }
+
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {beats.map((b, i) => (
-        <Reveal key={b.id} delay={Math.min(i * 55, 380)}>
-          <BeatCard beat={b} />
+    <div className={layout === 'list' ? 'grid gap-3' : 'grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}>
+      {beats.map((beat, index) => (
+        <Reveal key={beat.id} delay={Math.min(index * 55, 380)}>
+          <BeatCard beat={beat} layout={layout} />
         </Reveal>
       ))}
     </div>

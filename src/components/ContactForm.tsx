@@ -5,7 +5,9 @@ import { useToast } from './Toast';
 
 const SUBJECTS = [
   'Custom beat enquiry',
-  'Mixing & mastering',
+  'Recording session',
+  'Mixing',
+  'Mastering',
   'Licensing question',
   'Problem with an order',
   'Something else',

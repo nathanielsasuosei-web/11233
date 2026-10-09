@@ -49,7 +49,7 @@ export default function BeatsPage({
         }}
       />
 
-      <BeatGrid beats={beats} />
+      <BeatGrid beats={beats} layout="list" />
     </div>
   );
 }
