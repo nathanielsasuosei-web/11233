@@ -170,6 +170,16 @@ export default function HomePage() {
                       </span>
                     ))}
                   </div>
+                  <Link
+                    href={`/contact?service=${service.title.toLowerCase()}`}
+                    aria-label={`Enquire about ${service.title}`}
+                    className="btn-ghost relative mt-6 w-full !justify-between !rounded-xl !px-4 !py-3 text-xs"
+                  >
+                    Enquire about {service.title}
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </Link>
                 </article>
               </Reveal>
             ))}

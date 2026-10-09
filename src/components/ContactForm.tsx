@@ -16,11 +16,18 @@ const SUBJECTS = [
 export default function ContactForm({
   name,
   email,
+  initialSubject,
 }: {
   name: string;
   email: string;
+  initialSubject?: string;
 }) {
-  const [form, setForm] = useState({ name, email, subject: SUBJECTS[0], body: '' });
+  const [form, setForm] = useState({
+    name,
+    email,
+    subject: initialSubject && SUBJECTS.includes(initialSubject) ? initialSubject : SUBJECTS[0],
+    body: '',
+  });
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const toast = useToast();
