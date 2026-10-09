@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { get, run } from '@/lib/db';
+import { readLocalUpload } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,23 +45,21 @@ export async function GET(_req: Request, { params }: { params: { token: string }
 
   // Locally stored files are streamed with an attachment header.
   if (fileUrl.startsWith('/uploads/')) {
-    const filePath = path.join(process.cwd(), 'public', fileUrl);
-    try {
-      const data = await fs.readFile(filePath);
-      return new NextResponse(new Uint8Array(data), {
-        headers: {
-          'Content-Type': fileUrl.endsWith('.wav')
-            ? 'audio/wav'
-            : fileUrl.endsWith('.mp3')
-              ? 'audio/mpeg'
-              : 'application/octet-stream',
-          'Content-Disposition': `attachment; filename="${filename}"`,
-          'Cache-Control': 'no-store',
-        },
-      });
-    } catch {
+    const data = await readLocalUpload(fileUrl);
+    if (!data) {
       return new NextResponse('File is missing on the server.', { status: 404 });
     }
+    return new NextResponse(new Uint8Array(data), {
+      headers: {
+        'Content-Type': fileUrl.endsWith('.wav')
+          ? 'audio/wav'
+          : fileUrl.endsWith('.mp3')
+            ? 'audio/mpeg'
+            : 'application/octet-stream',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Cache-Control': 'no-store',
+      },
+    });
   }
 
   // Cloud storage: hand off to the object URL.

@@ -57,6 +57,34 @@ Both are overridable with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars.
 
 ---
 
+## ☁️ Deploying to Vercel
+
+The app runs on Vercel's serverless runtime with zero configuration, but that
+runtime has a **read-only filesystem** — only `/tmp` is writable. The app
+detects this automatically (`src/lib/env.ts`):
+
+- The **SQLite database** defaults to `/tmp/beatvault/data/beatvault.db`
+  instead of `./data/`, so the first request no longer crashes with
+  `ENOENT: mkdir '/var/task/data'`.
+- **Runtime uploads** go to `/tmp/beatvault/public/uploads` and are served by
+  the `/uploads/[...path]` route handler (see `src/app/uploads/[...path]/route.ts`).
+- **Demo beats and cover art are generated at build time** (`prebuild` →
+  `scripts/make-demo-media.mjs`), so a fresh deploy ships with playable previews
+  in `public/uploads`.
+
+⚠️ `/tmp` is **ephemeral and per-instance**: data survives between warm requests
+but not across cold starts or instances. That's fine for trying the demo; for a
+real store:
+
+1. Use an external database (Turso, Neon, Vercel Postgres, …) — `src/lib/db.ts`
+   is the only file to adapt, the exported helpers (`all`, `get`, `run`, `exec`)
+   stay the same.
+2. Configure the `S3_*` env vars so uploads land in object storage.
+3. Only set `DATABASE_PATH` if you point it at a writable location (e.g. under
+   `/tmp`); a relative path resolves against the read-only deployment root.
+
+---
+
 ## 💳 Taking real payments
 
 Out of the box the store runs a **simulated checkout** so you can test the complete
