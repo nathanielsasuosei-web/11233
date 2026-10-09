@@ -7,6 +7,66 @@ import VideoCard from '@/components/VideoCard';
 import { getSettings } from '@/lib/db';
 import { listBeats, listVideos, siteStats } from '@/lib/queries';
 
+const STUDIO_SERVICES = [
+  {
+    number: '01',
+    title: 'Recording',
+    label: 'Capture the performance',
+    icon: 'recording' as const,
+    description:
+      'Get a clear, confident vocal take with focused tracking, punch-ins, and take comping shaped around your performance.',
+    details: ['Vocal tracking', 'Punch-ins', 'Take comping'],
+  },
+  {
+    number: '02',
+    title: 'Mixing',
+    label: 'Bring every layer into focus',
+    icon: 'mixing' as const,
+    description:
+      'Balance vocals and instruments, shape space and detail, and make every element work together as one record.',
+    details: ['Vocal balance', 'Depth & clarity', 'Mix revisions'],
+  },
+  {
+    number: '03',
+    title: 'Mastering',
+    label: 'Finish it for release',
+    icon: 'mastering' as const,
+    description:
+      'Add the final tonal and loudness polish so your track feels cohesive and translates across listening systems.',
+    details: ['Final polish', 'Streaming-ready', 'Release check'],
+  },
+];
+
+function StudioServiceIcon({ name }: { name: 'recording' | 'mixing' | 'mastering' }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {name === 'recording' ? (
+        <>
+          <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+          <path d="M19 10v1a7 7 0 0 1-14 0v-1m7 8v4m-4 0h8" />
+        </>
+      ) : name === 'mixing' ? (
+        <>
+          <path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3" />
+          <path d="M2 14h4m4-6h4m4 4h4" />
+        </>
+      ) : (
+        <path d="M2 12h3l2-6 4 12 3-9 2 6 2-3h4" />
+      )}
+    </svg>
+  );
+}
+
 export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
@@ -68,39 +128,74 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ---------------- CTA ---------------- */}
-      <section className="container-x py-20 sm:py-28">
-        <Reveal>
-          <div className="relative overflow-hidden rounded-[32px] border border-brand-500/20 bg-gradient-to-br from-brand-950 via-ink-900 to-ink-900 px-6 py-14 text-center sm:px-14 sm:py-20">
-            <div className="pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-brand-600/25 blur-[90px]" />
-            <div className="pointer-events-none absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-brand-800/25 blur-[90px]" />
-            <div className="grid-bg pointer-events-none absolute inset-0 opacity-25" />
-            <div className="relative">
-              <div className="chip mx-auto border-brand-500/30 bg-brand-950/60 text-brand-200">
-                Limited slots this month
-              </div>
-              <h2 className="display mx-auto mt-6 max-w-3xl text-[clamp(2rem,5.4vw,3.8rem)] text-white">
-                Need something
-                <span className="bg-gradient-to-r from-brand-300 to-brand-600 bg-clip-text text-transparent">
-                  {' '}
-                  custom-built?
-                </span>
-              </h2>
-              <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-white/55 sm:text-base">
-                Custom production, mixing and mastering for artists and brands. Tell me the
-                reference track and I&apos;ll send back something that sounds like you.
-              </p>
-              <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-                <Link href="/contact" className="btn-red !px-8 !py-4 text-sm">
-                  Start a project
-                </Link>
-                <Link href="/beats" className="btn-ghost !px-8 !py-4 text-sm">
-                  Browse beats
-                </Link>
-              </div>
-            </div>
+      {/* ---------------- studio services ---------------- */}
+      <section
+        id="studio"
+        className="relative isolate scroll-mt-24 overflow-hidden border-t border-white/[.06] bg-ink-850/25"
+      >
+        <div className="pointer-events-none absolute -right-28 -top-32 h-[420px] w-[420px] rounded-full bg-brand-700/10 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-40 -left-24 h-[360px] w-[360px] rounded-full bg-brand-950/30 blur-[110px]" />
+        <div className="container-x relative py-20 sm:py-28">
+          <SectionHeading
+            eyebrow="Studio services"
+            title="From first take to"
+            accent="final master"
+            sub="Recording, mixing and mastering for artists who want their records to feel finished and release-ready."
+          />
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {STUDIO_SERVICES.map((service, index) => (
+              <Reveal key={service.title} delay={index * 90}>
+                <article className="group relative h-full overflow-hidden rounded-2xl border border-white/[.08] bg-black/[.35] p-6 transition-all duration-500 hover:-translate-y-1 hover:border-brand-500/30 hover:bg-ink-850/80">
+                  <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-brand-600/10 blur-3xl transition-colors duration-500 group-hover:bg-brand-500/20" />
+                  <div className="relative flex items-center justify-between">
+                    <span className="grid h-12 w-12 place-items-center rounded-xl border border-brand-500/20 bg-brand-950/40 text-brand-300 transition-colors group-hover:border-brand-500/40 group-hover:bg-brand-950/70">
+                      <StudioServiceIcon name={service.icon} />
+                    </span>
+                    <span className="display text-3xl text-white/15 transition-colors group-hover:text-brand-500/35">
+                      {service.number}
+                    </span>
+                  </div>
+                  <div className="relative mt-7 text-[10px] font-bold uppercase tracking-[.18em] text-brand-300">
+                    {service.label}
+                  </div>
+                  <h3 className="display relative mt-2 text-2xl text-white">{service.title}</h3>
+                  <p className="relative mt-3 min-h-[72px] text-sm leading-6 text-white/50">
+                    {service.description}
+                  </p>
+                  <div className="relative mt-6 flex flex-wrap gap-2 border-t border-white/[.07] pt-5">
+                    {service.details.map((detail) => (
+                      <span key={detail} className="chip text-[9px]">
+                        {detail}
+                      </span>
+                    ))}
+                  </div>
+                </article>
+              </Reveal>
+            ))}
           </div>
-        </Reveal>
+
+          <Reveal delay={120}>
+            <div className="mt-7 flex flex-col gap-5 rounded-3xl border border-brand-500/20 bg-gradient-to-r from-brand-950/40 via-ink-900/80 to-ink-900/70 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[.18em] text-brand-300">
+                  Ready for the next step?
+                </div>
+                <h3 className="display mt-2 text-xl text-white">Tell us what your track needs.</h3>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/50">
+                  Share a demo, a reference, or where you are in the process and we&apos;ll help you
+                  choose the right studio service.
+                </p>
+              </div>
+              <Link href="/contact" className="btn-red shrink-0 !px-6 !py-3 text-xs">
+                Contact the studio
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </Link>
+            </div>
+          </Reveal>
+        </div>
       </section>
     </>
   );

@@ -96,36 +96,6 @@ export default function Hero({
         </div>
       </div>
 
-      {/* ---------- marquee ---------- */}
-      <div className="absolute inset-x-0 bottom-0 overflow-hidden border-y border-white/[.06] bg-ink-950/60 py-3 backdrop-blur">
-        <div className="flex w-max animate-marquee gap-10 whitespace-nowrap">
-          {Array.from({ length: 2 }).map((_, dup) => (
-            <div key={dup} className="flex gap-10">
-              {[
-                'Afrobeats',
-                'Drill',
-                'Amapiano',
-                'Trap',
-                'Highlife',
-                'R&B',
-                'Instant email delivery',
-                'Mobile Money',
-                'Bank transfer',
-                'WAV + Stems',
-              ].map((g) => (
-                <span
-                  key={g + dup}
-                  className="flex items-center gap-10 text-[11px] font-bold uppercase tracking-[.28em] text-white/30"
-                >
-                  {g}
-                  <span className="h-1 w-1 rounded-full bg-brand-500" />
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
       <VideoModal
         open={video}
         onClose={() => setVideo(false)}
