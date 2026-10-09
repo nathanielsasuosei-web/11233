@@ -6,35 +6,6 @@ import HeroCanvas from './HeroCanvas';
 import HeroPlayer, { type HeroBeat } from './HeroPlayer';
 import VideoModal from './VideoModal';
 
-function SplitText({
-  text,
-  className = '',
-  base = 0,
-}: {
-  text: string;
-  className?: string;
-  base?: number;
-}) {
-  return (
-    <span className={`inline-block ${className}`}>
-      {text.split(' ').map((word, wi, arr) => (
-        <span key={wi} className="inline-block whitespace-nowrap">
-          {word.split('').map((ch, ci) => (
-            <span
-              key={ci}
-              className="inline-block animate-fade-up"
-              style={{ animationDelay: `${base + wi * 90 + ci * 34}ms` }}
-            >
-              {ch}
-            </span>
-          ))}
-          {wi < arr.length - 1 && <span className="inline-block">&nbsp;</span>}
-        </span>
-      ))}
-    </span>
-  );
-}
-
 export default function Hero({
   settings,
   beat,
@@ -64,45 +35,8 @@ export default function Hero({
         <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_.9fr]">
           <div>
             <div
-              className="animate-fade-up inline-flex items-center gap-2.5 rounded-full border border-brand-500/30 bg-brand-950/50 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-brand-200 backdrop-blur"
+              className="animate-fade-up mb-8 flex flex-wrap items-center gap-3"
               style={{ animationDelay: '60ms' }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
-              </span>
-              New drops every Friday · Instant delivery
-            </div>
-
-            <h1 className="display mt-7 text-[clamp(2.9rem,8.4vw,7rem)] text-white">
-              <span className="block">
-                <SplitText text={settings.hero_headline || 'SOUND THAT'} base={180} />
-              </span>
-              <span className="block">
-                <SplitText
-                  text={settings.hero_headline_accent || 'MOVES CROWDS'}
-                  className="bg-gradient-to-r from-brand-300 via-brand-500 to-brand-700 bg-clip-text text-transparent"
-                  base={420}
-                />
-              </span>
-              <span
-                className="block animate-fade-up text-[clamp(1.5rem,3.4vw,2.6rem)] tracking-[.06em]"
-                style={{ animationDelay: '760ms' }}
-              >
-                <span className="stroke-text">STREAM · SELL · REPEAT</span>
-              </span>
-            </h1>
-
-            <p
-              className="animate-fade-up mt-7 max-w-xl text-[15px] leading-relaxed text-white/55 sm:text-base"
-              style={{ animationDelay: '880ms' }}
-            >
-              {settings.hero_sub}
-            </p>
-
-            <div
-              className="animate-fade-up mt-9 flex flex-wrap items-center gap-3"
-              style={{ animationDelay: '1000ms' }}
             >
               <Link href="/beats" className="btn-red !px-8 !py-4 text-sm">
                 Browse {stats.beats} beats
@@ -118,6 +52,17 @@ export default function Hero({
                 </span>
                 Watch showreel
               </button>
+            </div>
+
+            <div
+              className="animate-fade-up inline-flex items-center gap-2.5 rounded-full border border-brand-500/30 bg-brand-950/50 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-brand-200 backdrop-blur"
+              style={{ animationDelay: '60ms' }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
+              </span>
+              New drops every Friday · Instant delivery
             </div>
 
             <dl

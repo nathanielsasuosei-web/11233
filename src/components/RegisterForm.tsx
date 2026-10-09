@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useToast } from './Toast';
+import { AuthSubmitButton, shake } from './AuthMotion';
 
 export default function RegisterForm() {
   const [form, setForm] = useState({
@@ -15,6 +16,8 @@ export default function RegisterForm() {
     password: '',
   });
   const [busy, setBusy] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const router = useRouter();
   const next = useSearchParams().get('next');
@@ -30,10 +33,15 @@ export default function RegisterForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Could not create account');
+      setSuccess(true);
       toast('Account created — welcome 🎧');
-      router.push(next || '/dashboard');
-      router.refresh();
+      // Let the success animation play before navigating away.
+      setTimeout(() => {
+        router.push(next || '/dashboard');
+        router.refresh();
+      }, 900);
     } catch (err: any) {
+      shake(cardRef.current);
       toast(err.message || 'Could not create account', 'err');
     } finally {
       setBusy(false);
@@ -44,13 +52,13 @@ export default function RegisterForm() {
     setForm({ ...form, [k]: e.target.value });
 
   return (
-    <div className="card p-7">
+    <div ref={cardRef} className={`card auth-stagger p-7 ${success ? 'auth-success' : ''}`}>
       <h2 className="display text-2xl text-white">CREATE ACCOUNT</h2>
       <p className="mt-2 text-[13px] text-white/45">
         Free, and it takes about 30 seconds.
       </p>
 
-      <form onSubmit={submit} className="mt-7 space-y-4">
+      <form onSubmit={submit} className="auth-fields mt-7 space-y-4">
         <div>
           <label className="label">Full name</label>
           <input required value={form.name} onChange={set('name')} className="input" placeholder="Ama Serwaa" />
@@ -86,9 +94,13 @@ export default function RegisterForm() {
           />
         </div>
 
-        <button type="submit" disabled={busy} className="btn-red w-full !py-3.5 text-sm">
-          {busy ? 'Creating account…' : 'Create account'}
-        </button>
+        <AuthSubmitButton
+          busy={busy}
+          success={success}
+          idleLabel="Create account"
+          loadingLabel="Creating account…"
+          successLabel="Account created"
+        />
       </form>
 
       <p className="mt-5 text-center text-[11px] leading-relaxed text-white/30">

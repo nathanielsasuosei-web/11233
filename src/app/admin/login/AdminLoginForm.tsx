@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useToast } from '@/components/Toast';
+import { AuthSubmitButton, shake } from '@/components/AuthMotion';
 
 export default function AdminLoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const router = useRouter();
 
@@ -23,10 +26,14 @@ export default function AdminLoginForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Login failed');
+      setSuccess(true);
       toast('Welcome back, producer 🎛️');
-      router.push('/admin');
-      router.refresh();
+      setTimeout(() => {
+        router.push('/admin');
+        router.refresh();
+      }, 900);
     } catch (err: any) {
+      shake(cardRef.current);
       toast(err.message || 'Login failed', 'err');
     } finally {
       setBusy(false);
@@ -34,7 +41,7 @@ export default function AdminLoginForm() {
   }
 
   return (
-    <div className="card w-full max-w-md p-8">
+    <div ref={cardRef} className={`card auth-stagger w-full max-w-md p-8 ${success ? 'auth-success' : ''}`}>
       <div className="mb-7 text-center">
         <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-700">
           <span className="flex items-end gap-[2px]">
@@ -49,7 +56,7 @@ export default function AdminLoginForm() {
         </p>
       </div>
 
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="auth-fields space-y-4">
         <div>
           <label className="label">Email</label>
           <input
@@ -72,9 +79,13 @@ export default function AdminLoginForm() {
             placeholder="••••••••"
           />
         </div>
-        <button type="submit" disabled={busy} className="btn-red w-full !py-3.5 text-sm">
-          {busy ? 'Logging in…' : 'Enter the studio'}
-        </button>
+        <AuthSubmitButton
+          busy={busy}
+          success={success}
+          idleLabel="Enter the studio"
+          loadingLabel="Logging in…"
+          successLabel="Access granted"
+        />
       </form>
 
       <button

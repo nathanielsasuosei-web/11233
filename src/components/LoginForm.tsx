@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useToast } from './Toast';
+import { AuthSubmitButton, shake } from './AuthMotion';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const toast = useToast();
   const router = useRouter();
   const next = useSearchParams().get('next');
@@ -24,10 +27,15 @@ export default function LoginForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Login failed');
+      setSuccess(true);
       toast('Welcome back 👋');
-      router.push(next || '/dashboard');
-      router.refresh();
+      // Let the success animation play before navigating away.
+      setTimeout(() => {
+        router.push(next || '/dashboard');
+        router.refresh();
+      }, 900);
     } catch (err: any) {
+      shake(cardRef.current);
       toast(err.message || 'Login failed', 'err');
     } finally {
       setBusy(false);
@@ -40,13 +48,13 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="card p-7">
+    <div ref={cardRef} className={`card auth-stagger p-7 ${success ? 'auth-success' : ''}`}>
       <h2 className="display text-2xl text-white">LOG IN</h2>
       <p className="mt-2 text-[13px] text-white/45">
         Access your purchases, downloads and messages.
       </p>
 
-      <form onSubmit={submit} className="mt-7 space-y-4">
+      <form onSubmit={submit} className="auth-fields mt-7 space-y-4">
         <div>
           <label className="label">Email</label>
           <input
@@ -72,9 +80,13 @@ export default function LoginForm() {
           />
         </div>
 
-        <button type="submit" disabled={busy} className="btn-red w-full !py-3.5 text-sm">
-          {busy ? 'Logging in…' : 'Log in'}
-        </button>
+        <AuthSubmitButton
+          busy={busy}
+          success={success}
+          idleLabel="Log in"
+          loadingLabel="Logging in…"
+          successLabel="Logged in"
+        />
       </form>
 
       <button

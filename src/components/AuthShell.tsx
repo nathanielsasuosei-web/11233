@@ -27,7 +27,7 @@ export default function AuthShell({
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(100%_80%_at_50%_0%,transparent_30%,rgba(8,8,10,.9)_100%)]" />
 
       <div className="container-x relative grid w-full gap-12 py-16 lg:grid-cols-2 lg:items-center">
-        <div className="hidden lg:block">
+        <div className="auth-from-left hidden lg:block">
           <div className="chip border-brand-500/30 bg-brand-950/50 text-brand-200">
             Artist access
           </div>
@@ -58,7 +58,7 @@ export default function AuthShell({
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-md">{children}</div>
+        <div className="auth-from-right mx-auto w-full max-w-md">{children}</div>
       </div>
 
       <div className="absolute bottom-4 left-0 right-0 text-center text-[11px] text-white/20">

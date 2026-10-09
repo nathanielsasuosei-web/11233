@@ -203,3 +203,151 @@ input[type='range'].red-range::-moz-range-thumb {
   opacity: 1;
   transform: none;
 }
+
+/* ---------- Auth (login / signup) motion ----------
+   Entrance, stagger, error shake and success states. Everything that moves
+   is wrapped in `prefers-reduced-motion: no-preference`, so users who ask
+   for less motion still get the final, fully visible layout. */
+@keyframes auth-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes auth-from-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(-40px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes auth-from-right {
+  0% {
+    opacity: 0;
+    transform: translate3d(40px, 0, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes auth-shake {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  15% {
+    transform: translate3d(-9px, 0, 0);
+  }
+  30% {
+    transform: translate3d(8px, 0, 0);
+  }
+  45% {
+    transform: translate3d(-6px, 0, 0);
+  }
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+  75% {
+    transform: translate3d(-2px, 0, 0);
+  }
+}
+@keyframes auth-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
+    border-color: rgba(255, 255, 255, 0.07);
+  }
+  60% {
+    box-shadow: 0 0 0 18px rgba(34, 197, 94, 0);
+    border-color: rgba(34, 197, 94, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    border-color: rgba(34, 197, 94, 0.45);
+  }
+}
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes auth-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes auth-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .auth-from-left {
+    animation: auth-from-left 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .auth-from-right {
+    animation: auth-from-right 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+  }
+
+  /* Card children rise in one after another. */
+  .auth-stagger > * {
+    animation: auth-rise 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .auth-stagger > *:nth-child(1) { animation-delay: 0.12s; }
+  .auth-stagger > *:nth-child(2) { animation-delay: 0.18s; }
+  .auth-stagger > *:nth-child(3) { animation-delay: 0.24s; }
+  .auth-stagger > *:nth-child(4) { animation-delay: 0.3s; }
+  .auth-stagger > *:nth-child(5) { animation-delay: 0.36s; }
+  .auth-stagger > *:nth-child(6) { animation-delay: 0.42s; }
+
+  /* Form fields cascade in after the heading. */
+  .auth-fields > * {
+    animation: auth-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .auth-fields > *:nth-child(1) { animation-delay: 0.2s; }
+  .auth-fields > *:nth-child(2) { animation-delay: 0.26s; }
+  .auth-fields > *:nth-child(3) { animation-delay: 0.32s; }
+  .auth-fields > *:nth-child(4) { animation-delay: 0.38s; }
+  .auth-fields > *:nth-child(5) { animation-delay: 0.44s; }
+  .auth-fields > *:nth-child(6) { animation-delay: 0.5s; }
+  .auth-fields > *:nth-child(7) { animation-delay: 0.56s; }
+  .auth-fields > *:nth-child(8) { animation-delay: 0.62s; }
+
+  .auth-shake {
+    animation: auth-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+  .auth-success {
+    animation: auth-glow 1.1s ease-out;
+  }
+  .auth-spin {
+    animation: auth-spin 0.7s linear infinite;
+  }
+  .auth-label-in {
+    display: inline-block;
+    animation: auth-rise 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .auth-pop {
+    animation: auth-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .auth-check-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: auth-draw 0.45s 0.12s ease-out forwards;
+  }
+}
