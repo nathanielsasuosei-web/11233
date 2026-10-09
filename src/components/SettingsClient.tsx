@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
 
 const FIELDS: { section: string; key: string; label: string; placeholder?: string; help?: string; type?: string }[] = [
-  { section: 'Studio', key: 'studio_name', label: 'Studio / brand name', placeholder: 'BEATVAULT' },
+  { section: 'Studio', key: 'studio_name', label: 'Studio / brand name', placeholder: 'PROJECT 1' },
   { section: 'Studio', key: 'producer_name', label: 'Producer name', placeholder: 'Nathaniel Sasuosei' },
   { section: 'Studio', key: 'tagline', label: 'Tagline', placeholder: 'Premium beats for serious artists' },
   { section: 'Studio', key: 'support_email', label: 'Public support email', placeholder: 'hello@beatvault.gh' },
@@ -24,7 +24,7 @@ const FIELDS: { section: string; key: string; label: string; placeholder?: strin
   { section: 'payments', key: 'bank_account_name', label: 'Account name', placeholder: 'Nathaniel Sasuosei' },
   { section: 'payments', key: 'bank_account_number', label: 'Account number', placeholder: '0000000000' },
 
-  { section: 'email', key: 'email_from', label: 'From address', placeholder: 'Beatvault <orders@beatvault.gh>' },
+  { section: 'email', key: 'email_from', label: 'From address', placeholder: 'Project 1 <orders@beatvault.gh>' },
 ];
 
 const SECTIONS = [

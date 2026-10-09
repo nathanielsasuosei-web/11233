@@ -5,7 +5,7 @@ import { timeAgo } from '@/lib/utils';
 import DashboardMessageForm from './DashboardMessageForm';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Messages — Beatvault' };
+export const metadata = { title: 'Messages — Project 1' };
 
 export default async function MessagesPage() {
   const user = await requireArtist();

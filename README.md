@@ -1,4 +1,4 @@
-# 🎧 Beatvault — Beat Store for Music Producers
+# 🎧 Project 1 — Beat Store for Music Producers
 
 A complete beat-selling website: the producer uploads beats and videos from an admin
 dashboard, artists create accounts, pay by **Mobile Money** or **bank transfer**, and the
@@ -120,7 +120,7 @@ SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=you@gmail.com
 SMTP_PASS=your-app-password
-EMAIL_FROM=Beatvault <orders@beatvault.gh>
+EMAIL_FROM=Project 1 <orders@beatvault.gh>
 ```
 
 Without SMTP the app stays fully functional: every message is rendered and stored in

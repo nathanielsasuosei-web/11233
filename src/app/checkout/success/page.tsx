@@ -9,7 +9,7 @@ import DownloadRow from '@/components/DownloadRow';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Order confirmed — Beatvault' };
+export const metadata = { title: 'Order confirmed — Project 1' };
 
 export default async function SuccessPage({
   searchParams,

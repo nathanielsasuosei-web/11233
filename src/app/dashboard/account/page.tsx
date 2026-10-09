@@ -3,7 +3,7 @@ import { requireArtist } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Account settings — Beatvault' };
+export const metadata = { title: 'Account settings — Project 1' };
 
 export default async function AccountPage() {
   const user = await requireArtist();

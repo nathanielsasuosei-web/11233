@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { requireArtist } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Create account — Beatvault' };
+export const metadata = { title: 'Create account — Project 1' };
 
 export default async function RegisterPage() {
   if (await requireArtist()) redirect('/dashboard');

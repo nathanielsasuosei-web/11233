@@ -7,7 +7,7 @@ import { genres, listBeats } from '@/lib/queries';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'All beats — Beatvault',
+  title: 'All beats — Project 1',
   description: 'Browse and preview every instrumental in the catalogue.',
 };
 

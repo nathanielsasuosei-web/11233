@@ -71,7 +71,7 @@ export default function Navbar({
                 </span>
               </span>
               <span className="display text-[17px] tracking-tight">
-                {settings.studio_name || 'BEATVAULT'}
+                {settings.studio_name || 'PROJECT 1'}
               </span>
             </Link>
 

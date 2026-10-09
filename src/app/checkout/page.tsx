@@ -4,7 +4,7 @@ import { paystackMode } from '@/lib/paystack';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Checkout — Beatvault' };
+export const metadata = { title: 'Checkout — Project 1' };
 
 export default async function CheckoutPage() {
   const user = await requireArtist();

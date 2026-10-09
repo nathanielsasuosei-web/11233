@@ -6,7 +6,7 @@ export default function Footer({
 }: {
   settings: Record<string, string>;
 }) {
-  const studio = settings.studio_name || 'BEATVAULT';
+  const studio = settings.studio_name || 'PROJECT 1';
   return (
     <footer className="relative mt-24 overflow-hidden border-t border-white/[.07] bg-ink-900">
       <div className="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[900px] -translate-x-1/2 rounded-full bg-brand-600/10 blur-[100px]" />

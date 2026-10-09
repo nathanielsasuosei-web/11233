@@ -5,7 +5,7 @@ import { getSettings, getSetting } from '@/lib/db';
 import { siteStats } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'About the producer — Beatvault' };
+export const metadata = { title: 'About the producer — Project 1' };
 
 const CREDITS = [
   ['Radio/TV', 'Adverts, idents & sync'],

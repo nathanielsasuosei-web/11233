@@ -5,7 +5,7 @@ import { getSettings } from '@/lib/db';
 import { requireArtist } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Contact — Beatvault' };
+export const metadata = { title: 'Contact — Project 1' };
 
 const SERVICE_SUBJECTS: Record<string, string> = {
   recording: 'Recording session',

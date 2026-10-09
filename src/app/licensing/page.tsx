@@ -5,7 +5,7 @@ import { getSetting } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
-  title: 'Licensing explained — Beatvault',
+  title: 'Licensing explained — Project 1',
   description: 'What each beat licence allows: leases, exclusive rights and buyouts.',
 };
 

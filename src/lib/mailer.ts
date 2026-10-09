@@ -82,7 +82,7 @@ export function escapeHtml(s: string) {
 }
 
 function shell(opts: { title: string; body: string; preheader?: string }) {
-  const studio = getSetting('studio_name') || 'BEATVAULT';
+  const studio = getSetting('studio_name') || 'PROJECT 1';
   const producer = getSetting('producer_name') || '';
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${escapeHtml(opts.title)}</title></head>

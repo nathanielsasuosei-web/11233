@@ -8,7 +8,7 @@ import DownloadRow from '@/components/DownloadRow';
 import Reveal from '@/components/Reveal';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'My library — Beatvault' };
+export const metadata = { title: 'My library — Project 1' };
 
 export default async function DashboardHome() {
   const user = await requireArtist();

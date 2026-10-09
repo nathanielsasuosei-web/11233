@@ -14,9 +14,9 @@ type Props = { params: { slug: string } };
 
 export function generateMetadata({ params }: Props): Metadata {
   const beat = getBeatBySlug(params.slug);
-  if (!beat) return { title: 'Beat not found — Beatvault' };
+  if (!beat) return { title: 'Beat not found — Project 1' };
   return {
-    title: `${beat.title} — ${beat.genre} beat | Beatvault`,
+    title: `${beat.title} — ${beat.genre} beat | Project 1`,
     description: beat.description.slice(0, 155),
   };
 }

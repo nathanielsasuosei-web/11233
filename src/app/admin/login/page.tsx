@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Producer login — Beatvault' };
+export const metadata = { title: 'Producer login — Project 1' };
 
 export default async function AdminLoginPage() {
   if (await requireAdmin()) redirect('/admin');
