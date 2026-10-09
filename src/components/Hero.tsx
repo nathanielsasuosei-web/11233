@@ -6,35 +6,6 @@ import HeroCanvas from './HeroCanvas';
 import HeroPlayer, { type HeroBeat } from './HeroPlayer';
 import VideoModal from './VideoModal';
 
-function SplitText({
-  text,
-  className = '',
-  base = 0,
-}: {
-  text: string;
-  className?: string;
-  base?: number;
-}) {
-  return (
-    <span className={`inline-block ${className}`}>
-      {text.split(' ').map((word, wi, arr) => (
-        <span key={wi} className="inline-block whitespace-nowrap">
-          {word.split('').map((ch, ci) => (
-            <span
-              key={ci}
-              className="inline-block animate-fade-up"
-              style={{ animationDelay: `${base + wi * 90 + ci * 34}ms` }}
-            >
-              {ch}
-            </span>
-          ))}
-          {wi < arr.length - 1 && <span className="inline-block">&nbsp;</span>}
-        </span>
-      ))}
-    </span>
-  );
-}
-
 export default function Hero({
   settings,
   beat,
@@ -74,31 +45,7 @@ export default function Hero({
               New drops every Friday · Instant delivery
             </div>
 
-            <h1 className="display mt-7 text-[clamp(2.9rem,8.4vw,7rem)] text-white">
-              <span className="block">
-                <SplitText text={settings.hero_headline || 'SOUND THAT'} base={180} />
-              </span>
-              <span className="block">
-                <SplitText
-                  text={settings.hero_headline_accent || 'MOVES CROWDS'}
-                  className="bg-gradient-to-r from-brand-300 via-brand-500 to-brand-700 bg-clip-text text-transparent"
-                  base={420}
-                />
-              </span>
-              <span
-                className="block animate-fade-up text-[clamp(1.5rem,3.4vw,2.6rem)] tracking-[.06em]"
-                style={{ animationDelay: '760ms' }}
-              >
-                <span className="stroke-text">STREAM · SELL · REPEAT</span>
-              </span>
-            </h1>
 
-            <p
-              className="animate-fade-up mt-7 max-w-xl text-[15px] leading-relaxed text-white/55 sm:text-base"
-              style={{ animationDelay: '880ms' }}
-            >
-              {settings.hero_sub}
-            </p>
 
             <div
               className="animate-fade-up mt-9 flex flex-wrap items-center gap-3"
