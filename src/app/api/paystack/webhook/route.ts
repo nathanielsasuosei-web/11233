@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'node:crypto';
-import { completeOrder } from '@/lib/complete';
+import { completeBooking, completeOrder } from '@/lib/complete';
 import { fallbackUrl } from '@/lib/fulfill';
 
 /**
@@ -23,9 +23,12 @@ export async function POST(req: Request) {
   if (event?.event === 'charge.success') {
     const reference = event?.data?.reference;
     if (reference) {
-      await completeOrder(reference, fallbackUrl, {
-        channel: event?.data?.channel,
-      });
+      // Studio deposits use a BK- reference; beat orders use BV-.
+      if (String(reference).startsWith('BK-')) {
+        await completeBooking(reference, fallbackUrl, { channel: event?.data?.channel });
+      } else {
+        await completeOrder(reference, fallbackUrl, { channel: event?.data?.channel });
+      }
     }
   }
 

@@ -10,6 +10,7 @@ export const ADMIN_LINKS = [
   { href: '/admin/beats', label: 'Beats', icon: '🎵' },
   { href: '/admin/videos', label: 'Videos', icon: '🎬' },
   { href: '/admin/orders', label: 'Orders', icon: '🧾' },
+  { href: '/admin/bookings', label: 'Studio', icon: '🎙️' },
   { href: '/admin/artists', label: 'Artists', icon: '👤' },
   { href: '/admin/messages', label: 'Messages', icon: '✉️' },
   { href: '/admin/outbox', label: 'Email outbox', icon: '📤' },
@@ -21,7 +22,7 @@ export default function AdminNav({
   badges,
 }: {
   name: string;
-  badges: { messages: number; orders: number };
+  badges: { messages: number; orders: number; bookings?: number };
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -72,6 +73,11 @@ export default function AdminNav({
                     {l.href === '/admin/orders' && badges.orders > 0 && (
                       <span className="grid h-5 min-w-5 place-items-center rounded-full bg-amber-500 px-1 text-[10px] font-black text-white">
                         {badges.orders}
+                      </span>
+                    )}
+                    {l.href === '/admin/bookings' && (badges.bookings || 0) > 0 && (
+                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-brand-500 px-1 text-[10px] font-black text-white">
+                        {badges.bookings}
                       </span>
                     )}
                   </Link>

@@ -164,9 +164,58 @@ function migrate(d: DatabaseSync) {
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS studio_services (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug           TEXT NOT NULL UNIQUE,
+    title          TEXT NOT NULL,
+    blurb          TEXT DEFAULT '',
+    includes       TEXT DEFAULT '',
+    icon           TEXT DEFAULT 'recording',
+    price_per_hour INTEGER NOT NULL DEFAULT 0,
+    min_hours      INTEGER NOT NULL DEFAULT 1,
+    max_hours      INTEGER NOT NULL DEFAULT 8,
+    published      INTEGER NOT NULL DEFAULT 1,
+    sort           INTEGER NOT NULL DEFAULT 0,
+    created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS bookings (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    reference      TEXT NOT NULL UNIQUE,
+    user_id        INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    service_id     INTEGER REFERENCES studio_services(id) ON DELETE SET NULL,
+    service_title  TEXT NOT NULL,
+    hours          INTEGER NOT NULL DEFAULT 1,
+    session_date   TEXT NOT NULL,
+    start_time     TEXT NOT NULL,
+    end_time       TEXT NOT NULL,
+    name           TEXT NOT NULL,
+    email          TEXT NOT NULL,
+    phone          TEXT DEFAULT '',
+    notes          TEXT DEFAULT '',
+    price          INTEGER NOT NULL DEFAULT 0,
+    deposit        INTEGER NOT NULL DEFAULT 0,
+    balance        INTEGER NOT NULL DEFAULT 0,
+    deposit_percent INTEGER NOT NULL DEFAULT 50,
+    status         TEXT NOT NULL DEFAULT 'pending',
+    method         TEXT DEFAULT '',
+    channel        TEXT DEFAULT '',
+    provider       TEXT NOT NULL DEFAULT 'paystack',
+    provider_ref   TEXT DEFAULT '',
+    pay_email      TEXT DEFAULT '',
+    pay_phone      TEXT DEFAULT '',
+    paid_at        TEXT,
+    closed_at      TEXT,
+    cancel_reason  TEXT DEFAULT '',
+    created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_beats_status ON beats(status);
   CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
   CREATE INDEX IF NOT EXISTS idx_items_order ON order_items(order_id);
+  CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(session_date, status);
+  CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
   `);
 }
 
@@ -248,6 +297,55 @@ function seedIfEmpty(d: DatabaseSync) {
         sales[i],
       );
     });
+  }
+
+  const serviceCount = d.prepare('SELECT COUNT(*) c FROM studio_services').get() as { c: number };
+  if (Number(serviceCount?.c || 0) === 0) {
+    const insSvc = d.prepare(
+      `INSERT INTO studio_services (slug, title, blurb, includes, icon, price_per_hour, min_hours, max_hours, published, sort)
+       VALUES (?,?,?,?,?,?,?,?,1,?)`,
+    );
+    [
+      ['recording', 'Recording', 'Vocal tracking, punch-ins and take comping with a session engineer on the board.', 'Mic chain + comping|Beat select|Raw mix down|Vocal tuning notes', 'recording', 12000, 1, 8, 1],
+      ['mixing', 'Mixing', 'Balance, space and detail — every element made to work together as one record.', 'Recalled session|2 revisions|Streaming + club versions', 'mixing', 15000, 2, 6, 2],
+      ['mastering', 'Mastering', 'Final tonal and loudness polish so the record translates on every system.', 'Stream/CD versions|Dithered WAV|3 dB target options', 'mastering', 9000, 1, 4, 3],
+    ].forEach((r) => insSvc.run(...r));
+  }
+
+  const bookingCount = d.prepare('SELECT COUNT(*) c FROM bookings').get() as { c: number };
+  if (Number(bookingCount?.c || 0) === 0) {
+    const in1h = new Date(Date.now() + 86400000);
+    const day = in1h.toISOString().slice(0, 10);
+    const svc = d.prepare("SELECT id, title, price_per_hour FROM studio_services WHERE slug = 'mixing'").get() as
+      | { id: number; title: string; price_per_hour: number }
+      | undefined;
+    if (svc) {
+      const price = Number(svc.price_per_hour) * 3;
+      d.prepare(
+        `INSERT INTO bookings (reference, user_id, service_id, service_title, hours, session_date, start_time, end_time,
+          name, email, phone, notes, price, deposit, balance, deposit_percent, status, paid_at)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      ).run(
+        'BK-DEMO-0001',
+        demoUserId || null,
+        svc.id,
+        svc.title,
+        3,
+        day,
+        '14:00',
+        '17:00',
+        'Ama Serwaa',
+        'artist@example.com',
+        '0551234567',
+        'Six tracks to balance — vocals are already tuned.',
+        price,
+        Math.round(price / 2),
+        price - Math.round(price / 2),
+        50,
+        'deposit_paid',
+        new Date().toISOString(),
+      );
+    }
   }
 
   const videoCount = d.prepare('SELECT COUNT(*) c FROM videos').get() as { c: number };
@@ -405,6 +503,16 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   paystack_public_key: '',
   paystack_secret_key: '',
   broadcast_message: '',
+
+  studio_bookable: '1',
+  studio_deposit_percent: '50',
+  studio_open_hour: '10',
+  studio_close_hour: '18',
+  studio_open_days: '1-6',
+  studio_address: 'Osu, Accra — beat the traffic, come early.',
+  studio_phone: '',
+  studio_policy:
+    'Arrive 10 minutes before your session. The balance is payable at the studio before we hit record. Reschedule at least 24 hours in advance to keep your deposit.',
 };
 
 export function getSetting(key: string): string {

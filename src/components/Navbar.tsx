@@ -9,7 +9,7 @@ import { useSettings } from './SettingsProvider';
 const LINKS = [
   { href: '/beats', label: 'Beats' },
   { href: '/previews', label: 'Previews' },
-  { href: '/#studio', label: 'Studio' },
+  { href: '/studio', label: 'Studio' },
   { href: '/videos', label: 'Videos' },
   { href: '/licensing', label: 'Licensing' },
   { href: '/about', label: 'About' },

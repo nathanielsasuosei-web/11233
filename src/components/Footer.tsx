@@ -40,6 +40,7 @@ export default function Footer({
             <ul className="space-y-2.5 text-sm text-white/55">
               <li><Link className="hover:text-brand-300" href="/beats">All beats</Link></li>
               <li><Link className="hover:text-brand-300" href="/previews">Beat previews</Link></li>
+              <li><Link className="hover:text-brand-300" href="/studio">Book studio time</Link></li>
               <li><Link className="hover:text-brand-300" href="/videos">Videos</Link></li>
               <li><Link className="hover:text-brand-300" href="/licensing">Licensing</Link></li>
               <li><Link className="hover:text-brand-300" href="/checkout">Checkout</Link></li>
