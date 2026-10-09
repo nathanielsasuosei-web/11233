@@ -60,7 +60,7 @@ export default function AdminHome() {
       label: 'Storage',
       ok: storageMode() === 's3',
       on: 'S3-compatible object storage',
-      off: 'Local disk storage (/public/uploads)',
+      off: 'Local disk storage (public/uploads, or temp dir on serverless)',
       href: '/admin/settings#storage',
     },
   ];

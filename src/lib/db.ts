@@ -10,9 +10,16 @@ import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
+import { writableDir } from '@/lib/env';
 
-const DB_PATH =
-  process.env.DATABASE_PATH || path.join(process.cwd(), 'data', 'beatvault.db');
+/**
+ * The SQLite file lives in a writable directory: the project folder locally,
+ * or the OS temp dir on serverless hosts (Vercel/Lambda) where the deployment
+ * filesystem is read-only — writing to `process.cwd()` there crashes the
+ * first request with `ENOENT: mkdir '/var/task/data'`. Set DATABASE_PATH to
+ * override (it must point at a writable location). See src/lib/env.ts.
+ */
+const DB_PATH = process.env.DATABASE_PATH || writableDir('data', 'beatvault.db');
 
 let _db: DatabaseSync | null = null;
 

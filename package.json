@@ -5,6 +5,7 @@
   "description": "Beat marketplace for music producers — sell beats, deliver by email, take mobile money & bank payments.",
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
+    "prebuild": "node scripts/make-demo-media.mjs",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 3000",
     "lint": "next lint",
