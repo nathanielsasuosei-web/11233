@@ -9,27 +9,6 @@ import { listBeats, listVideos, siteStats } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
 
-const STEPS = [
-  {
-    n: '01',
-    title: 'Pick your beat',
-    body: 'Preview every instrumental in the player, filter by genre, BPM or key until it feels right.',
-    icon: '🎧',
-  },
-  {
-    n: '02',
-    title: 'Pay your way',
-    body: 'Check out with Mobile Money (MTN, Vodafone, AirtelTigo), bank transfer or card. Your choice of licence sets the price.',
-    icon: '📱',
-  },
-  {
-    n: '03',
-    title: 'Files in your inbox',
-    body: 'The moment payment lands, your MP3 / WAV / stems are emailed to you and saved in your library.',
-    icon: '✉️',
-  },
-];
-
 export default function HomePage() {
   const settings = getSettings();
   const featured = listBeats({ featured: true, limit: 8 });
@@ -61,52 +40,6 @@ export default function HomePage() {
           }
         />
         <BeatGrid beats={featured.length ? featured : fresh} />
-      </section>
-
-      {/* ---------------- how it works ---------------- */}
-      <section className="relative overflow-hidden border-y border-white/[.06] bg-ink-850/50 py-20 sm:py-28">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-30" />
-        <div className="pointer-events-none absolute -left-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-brand-700/15 blur-[100px]" />
-        <div className="container-x relative">
-          <SectionHeading
-            eyebrow="How it works"
-            title="From checkout to"
-            accent="your inbox"
-            sub="No waiting on DMs, no manual transfers. The whole thing is automated."
-          />
-          <div className="grid gap-5 md:grid-cols-3">
-            {STEPS.map((s, i) => (
-              <Reveal key={s.n} delay={i * 110}>
-                <div className="group relative h-full overflow-hidden rounded-2xl border border-white/[.07] bg-ink-900/60 p-7 transition-all duration-500 hover:border-brand-500/40">
-                  <div className="display absolute right-5 top-3 text-[5rem] leading-none text-white/[.04] transition group-hover:text-brand-500/10">
-                    {s.n}
-                  </div>
-                  <div className="mb-5 grid h-12 w-12 place-items-center rounded-2xl border border-brand-500/25 bg-brand-950/50 text-xl">
-                    {s.icon}
-                  </div>
-                  <h3 className="display text-xl text-white">{s.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/50">{s.body}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- fresh ---------------- */}
-      <section className="container-x py-20 sm:py-28">
-        <SectionHeading
-          eyebrow="Just landed"
-          title="Fresh out the"
-          accent="studio"
-          sub="New instrumentals added this week."
-          action={
-            <Link href="/beats?sort=new" className="btn-ghost !px-6 !py-3 text-xs">
-              See what's new →
-            </Link>
-          }
-        />
-        <BeatGrid beats={fresh.slice(0, 4)} />
       </section>
 
       {/* ---------------- videos ---------------- */}
