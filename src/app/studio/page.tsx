@@ -18,7 +18,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Book studio time — Beatvault',
+  title: 'Book studio time — Project 1',
   description:
     'Recording, mixing and mastering sessions in Accra. Pick a slot, pay the deposit with Mobile Money, and your confirmation is emailed instantly.',
 };

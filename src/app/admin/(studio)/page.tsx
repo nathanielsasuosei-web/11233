@@ -8,7 +8,7 @@ import { smtpConfigured as mailConfigured } from '@/lib/mailer';
 import { storageMode } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Producer dashboard — Beatvault' };
+export const metadata = { title: 'Producer dashboard — Project 1' };
 
 export default function AdminHome() {
   const symbol = getSetting('currency_symbol') || 'GH₵';

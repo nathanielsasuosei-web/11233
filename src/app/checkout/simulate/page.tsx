@@ -7,7 +7,7 @@ import { getSetting } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Confirm payment — Beatvault' };
+export const metadata = { title: 'Confirm payment — Project 1' };
 
 export default function SimulatePage({
   searchParams,

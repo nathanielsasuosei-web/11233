@@ -12,7 +12,7 @@ import CartDrawer from '@/components/CartDrawer';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Beatvault — Premium beats, delivered instantly',
+  title: 'Project 1 — Premium beats, delivered instantly',
   description:
     'Buy Afrobeat, Drill, Amapiano and Trap instrumentals. Pay with Mobile Money or bank transfer and get your files by email instantly.',
 };

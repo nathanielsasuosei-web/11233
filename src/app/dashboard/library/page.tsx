@@ -7,7 +7,7 @@ import { formatMoney, timeAgo } from '@/lib/utils';
 import DownloadRow from '@/components/DownloadRow';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'My beats — Beatvault' };
+export const metadata = { title: 'My beats — Project 1' };
 
 export default async function LibraryPage() {
   const user = await requireArtist();

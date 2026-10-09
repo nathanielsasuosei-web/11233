@@ -10,7 +10,7 @@ import { paystackMode } from '@/lib/paystack';
 import { getBookingByRef } from '@/lib/studio';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Your studio booking — Beatvault' };
+export const metadata = { title: 'Your studio booking — Project 1' };
 
 export default async function StudioConfirmPage({
   searchParams,

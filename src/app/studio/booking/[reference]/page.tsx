@@ -6,7 +6,7 @@ import { getSetting } from '@/lib/db';
 import { getBookingByRef, releaseStaleHolds } from '@/lib/studio';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Your booking — Beatvault' };
+export const metadata = { title: 'Your booking — Project 1' };
 
 /**
  * The link an artist keeps: what was booked, what is paid, what is owed on the

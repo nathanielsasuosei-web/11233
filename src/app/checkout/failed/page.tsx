@@ -4,7 +4,7 @@ import { getSetting } from '@/lib/db';
 import { formatMoney } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Payment not completed — Beatvault' };
+export const metadata = { title: 'Payment not completed — Project 1' };
 
 export default function FailedPage({
   searchParams,

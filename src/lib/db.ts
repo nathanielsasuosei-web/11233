@@ -485,14 +485,14 @@ export function exec(sql: string) {
 /* ------------------------------------------------------------------ */
 
 export const DEFAULT_SETTINGS: Record<string, string> = {
-  studio_name: 'BEATVAULT',
+  studio_name: 'PROJECT 1',
   producer_name: 'Nathaniel Sasuosei',
   tagline: 'Premium beats for serious artists',
   hero_headline: 'SOUND THAT',
   hero_headline_accent: 'MOVES CROWDS',
   hero_sub:
     'Buy exclusive Afrobeat, Drill, Amapiano and Trap instrumentals. Pay with Mobile Money or bank transfer and get your files in your inbox instantly.',
-  email_from: 'Beatvault <onboarding@resend.dev>',
+  email_from: 'Project 1 <onboarding@resend.dev>',
   support_email: 'hello@beatvault.gh',
   currency: 'GHS',
   currency_symbol: 'GH₵',

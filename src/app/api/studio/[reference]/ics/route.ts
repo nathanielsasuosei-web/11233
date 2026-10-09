@@ -32,7 +32,7 @@ export async function GET(_req: Request, ctx: { params: { reference: string } })
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Beatvault//Studio bookings//EN',
+    'PRODID:-//Project 1//Studio bookings//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',

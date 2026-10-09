@@ -4,7 +4,7 @@ import { listVideos } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
-  title: 'Videos — Beatvault',
+  title: 'Videos — Project 1',
   description: 'Studio sessions, beat breakdowns and live sets.',
 };
 

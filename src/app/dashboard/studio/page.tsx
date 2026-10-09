@@ -7,7 +7,7 @@ import { getSetting } from '@/lib/db';
 import { listBookingsForEmail, releaseStaleHolds } from '@/lib/studio';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Studio bookings — Beatvault' };
+export const metadata = { title: 'Studio bookings — Project 1' };
 
 export default async function DashboardStudioPage() {
   const user = await requireArtist();
