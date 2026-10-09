@@ -7,9 +7,22 @@ import { requireArtist } from '@/lib/auth';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Contact — Beatvault' };
 
-export default async function ContactPage() {
+const SERVICE_SUBJECTS: Record<string, string> = {
+  recording: 'Recording session',
+  mixing: 'Mixing',
+  mastering: 'Mastering',
+};
+
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: { service?: string };
+}) {
   const s = getSettings();
   const user = await requireArtist();
+  const initialSubject = searchParams.service
+    ? SERVICE_SUBJECTS[searchParams.service.toLowerCase()]
+    : undefined;
 
   const cards = [
     { icon: '✉️', label: 'Email', value: s.support_email, href: `mailto:${s.support_email}` },
@@ -82,7 +95,11 @@ export default async function ContactPage() {
         </Reveal>
 
         <Reveal delay={80}>
-          <ContactForm name={user?.name || ''} email={user?.email || ''} />
+          <ContactForm
+            name={user?.name || ''}
+            email={user?.email || ''}
+            initialSubject={initialSubject}
+          />
         </Reveal>
       </div>
     </div>
