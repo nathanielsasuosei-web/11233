@@ -24,6 +24,9 @@ Built with Next.js 14 (App Router), Tailwind CSS, SQLite and Paystack.
 ### For artists
 - Create an account, log in, keep a permanent **library** of everything bought
 - Preview every beat inline before buying
+- **`/previews`** — every beat preview listed as one playable queue (tagged clip first, master
+  when no clip was cut), with "play every preview" to audition the whole catalogue back to back
+- The hero player carries the same queue, so the full catalogue is clickable from the homepage
 - Cart + checkout with **Mobile Money (MTN / Vodafone / AirtelTigo)**, **bank transfer** or **card**
 - Files **emailed instantly** plus re-downloadable from `/dashboard/library`
 - Message the producer and read replies in-thread
@@ -169,6 +172,7 @@ src/
   app/
     page.tsx                 animated homepage / hero
     beats/                   catalogue + beat detail
+    previews/                every beat preview, listed as one queue
     videos/  about/  contact/  licensing/
     login/  register/        artist auth
     dashboard/               artist library, messages, account

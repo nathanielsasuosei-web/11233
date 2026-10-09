@@ -14,9 +14,12 @@ const SORTS = [
 export default function BeatFilters({
   genres,
   active,
+  basePath = '/beats',
 }: {
   genres: { genre: string; count: number }[];
   active: { genre: string; q: string; sort: string };
+  /** Page the filters write to — the preview list reuses this on /previews. */
+  basePath?: string;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -31,7 +34,7 @@ export default function BeatFilters({
       if (!v || (k === 'genre' && v === 'All')) sp.delete(k);
       else sp.set(k, v);
     });
-    startTransition(() => router.push(`/beats?${sp.toString()}`, { scroll: false }));
+    startTransition(() => router.push(`${basePath}?${sp.toString()}`, { scroll: false }));
   }
 
   return (

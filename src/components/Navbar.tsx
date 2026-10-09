@@ -8,6 +8,7 @@ import { useSettings } from './SettingsProvider';
 
 const LINKS = [
   { href: '/beats', label: 'Beats' },
+  { href: '/previews', label: 'Previews' },
   { href: '/#studio', label: 'Studio' },
   { href: '/videos', label: 'Videos' },
   { href: '/licensing', label: 'Licensing' },
@@ -158,7 +159,7 @@ export default function Navbar({
           <div
             id="mobile-navigation"
             className={`overflow-hidden border-white/[.08] transition-[max-height,opacity] duration-300 lg:hidden ${
-              mobile ? 'max-h-[420px] border-t opacity-100' : 'max-h-0 opacity-0'
+              mobile ? 'max-h-[520px] border-t opacity-100' : 'max-h-0 opacity-0'
             }`}
           >
             <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">

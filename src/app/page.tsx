@@ -6,6 +6,7 @@ import Reveal from '@/components/Reveal';
 import VideoCard from '@/components/VideoCard';
 import { getSettings } from '@/lib/db';
 import { listBeats, listVideos, siteStats } from '@/lib/queries';
+import { playableBeats } from '@/lib/preview';
 
 const STUDIO_SERVICES = [
   {
@@ -71,35 +72,45 @@ export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   const settings = getSettings();
-  const featured = listBeats({ featured: true, limit: 8 });
-  const fresh = listBeats({ limit: 8 });
+  // No cap: every published beat is listed, so every preview is reachable here.
+  // listBeats() sorts featured first, so the highlights still lead the grid.
+  const beats = listBeats();
+  const previews = playableBeats(beats);
   const videos = listVideos(3);
   const stats = siteStats();
-  const heroBeat = featured[0] || fresh[0] || null;
+  const heroBeat = beats.find((b) => b.featured) || beats[0] || null;
 
   return (
     <>
       <Hero
         settings={settings}
         beat={heroBeat}
+        tracks={previews}
         showreelUrl={videos[0]?.video_url || ''}
         stats={stats}
       />
 
-      {/* ---------------- featured ---------------- */}
+      {/* ---------------- every beat ---------------- */}
       <section className="container-x py-20 sm:py-28">
         <SectionHeading
-          eyebrow="Hand-picked"
-          title="Featured"
-          accent="instrumentals"
-          sub="The ones artists keep coming back for. Every beat is mixed and mastered, ready for your vocals."
+          eyebrow="The full catalogue"
+          title="Every"
+          accent="instrumental"
+          sub={`${beats.length} beat${beats.length === 1 ? '' : 's'} listed with a playable preview${
+            previews.length !== beats.length ? ` (${previews.length} with audio uploaded so far)` : ''
+          }. Hit play on any cover, then pick the licence that fits your release.`}
           action={
-            <Link href="/beats" className="btn-ghost !px-6 !py-3 text-xs">
-              View all beats →
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/previews" className="btn-red !px-6 !py-3 text-xs">
+                Preview list →
+              </Link>
+              <Link href="/beats" className="btn-ghost !px-6 !py-3 text-xs">
+                View all beats →
+              </Link>
+            </div>
           }
         />
-        <BeatGrid beats={featured.length ? featured : fresh} />
+        <BeatGrid beats={beats} />
       </section>
 
       {/* ---------------- videos ---------------- */}
