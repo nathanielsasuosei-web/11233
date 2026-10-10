@@ -5,27 +5,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Signature red palette
+        // A muted oxide palette on warm charcoal; the site should feel like a
+        // small independent studio, not a glowing SaaS dashboard.
         brand: {
-          50: '#fff1f1',
-          100: '#ffdedd',
-          200: '#ffc4c4',
-          300: '#ff9d9d',
-          400: '#ff6467',
-          500: '#ff2d3a',
-          600: '#f5122a',
-          700: '#d10821',
-          800: '#ad0c20',
-          900: '#8f1020',
-          950: '#4d040d',
+          50: '#f7eee8',
+          100: '#efd8ca',
+          200: '#e5bca7',
+          300: '#d99877',
+          400: '#ca7957',
+          500: '#b96042',
+          600: '#a14f37',
+          700: '#82402f',
+          800: '#63352a',
+          900: '#45271f',
+          950: '#271713',
         },
         ink: {
-          900: '#000000',
-          850: '#0d0d10',
-          800: '#121216',
-          700: '#1a1a20',
-          600: '#26262e',
-          500: '#3a3a45',
+          900: '#151411',
+          850: '#1c1b17',
+          800: '#25241f',
+          700: '#302f29',
+          600: '#48463e',
+          500: '#625e54',
         },
       },
       fontFamily: {

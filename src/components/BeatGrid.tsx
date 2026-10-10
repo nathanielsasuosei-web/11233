@@ -11,12 +11,10 @@ export default function BeatGrid({
   if (!beats.length) {
     return (
       <div className="card grid place-items-center px-6 py-20 text-center">
-        <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl border border-white/10 bg-white/[.03] text-2xl">
-          🔍
-        </div>
-        <h3 className="display text-xl text-white">No beats found</h3>
-        <p className="mt-2 max-w-sm text-sm text-white/45">
-          Try a different genre, clear the search, or check back soon — new packs drop every Friday.
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[.14em] text-brand-300">No matches</p>
+        <h3 className="display text-xl text-white">Nothing in this filter.</h3>
+        <p className="mt-2 max-w-sm text-sm text-white/55">
+          Try another search term or clear the filters to see the full catalogue.
         </p>
       </div>
     );

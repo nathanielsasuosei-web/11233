@@ -49,7 +49,7 @@ export default function LoginForm() {
 
   return (
     <div ref={cardRef} className={`card auth-stagger p-7 ${success ? 'auth-success' : ''}`}>
-      <h2 className="display text-2xl text-white">LOG IN</h2>
+      <h2 className="display text-2xl text-white">Sign in</h2>
       <p className="mt-2 text-[13px] text-white/45">
         Access your purchases, downloads and messages.
       </p>

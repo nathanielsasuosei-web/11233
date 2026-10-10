@@ -167,7 +167,7 @@ export default function BeatDetailPage({ params }: Props) {
       {more.length > 0 && (
         <section className="mt-20 border-t border-white/[.06] pt-12">
           <h2 className="display mb-7 text-2xl text-white">
-            YOU MIGHT ALSO <span className="text-brand-500">LIKE</span>
+            More beats <span className="font-normal italic text-brand-300">to hear.</span>
           </h2>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {more.map((b) => (

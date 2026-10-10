@@ -234,12 +234,6 @@ const DEMO_BEATS = [
   { file: 'nocturne-77', title: 'Nocturne 77', genre: 'Amapiano', mood: 'Hypnotic', bpm: 112, key: 'D Minor', basic: 6500, premium: 15000, exclusive: 50000, buyout: 150000, tags: 'amapiano,deep,hypnotic,late night', featured: 0 },
 ];
 
-const DEMO_VIDEOS = [
-  { title: 'Studio Session — Log Drum Breakdown', description: 'Demo placeholder: replace this with your own studio video (YouTube link or uploaded file).', url: 'https://www.youtube.com/watch?v=YE7VzlLtp-4', beat: 'midnight-in-accra' },
-  { title: 'Beat Break — "Concrete Roses" from scratch', description: 'Demo placeholder: replace this with your own studio video (YouTube link or uploaded file).', url: 'https://www.youtube.com/watch?v=eRsGyueVLvQ', beat: 'concrete-roses' },
-  { title: 'Live at the Warehouse — Sunlight Driver', description: 'Demo placeholder: replace this with your own studio video (YouTube link or uploaded file).', url: 'https://www.youtube.com/watch?v=R6MlUcmOul8', beat: 'sunlight-driver' },
-];
-
 function seedIfEmpty(d: DatabaseSync) {
   const adminCount = d.prepare('SELECT COUNT(*) c FROM admins').get() as { c: number };
   if (Number(adminCount?.c || 0) === 0) {
@@ -345,19 +339,6 @@ function seedIfEmpty(d: DatabaseSync) {
         'deposit_paid',
         new Date().toISOString(),
       );
-    }
-  }
-
-  const videoCount = d.prepare('SELECT COUNT(*) c FROM videos').get() as { c: number };
-  if (Number(videoCount?.c || 0) === 0) {
-    const ins = d.prepare(
-      'INSERT INTO videos (title, description, source_type, video_url, beat_id) VALUES (?,?,?,?,?)',
-    );
-    for (const v of DEMO_VIDEOS) {
-      const b = d.prepare('SELECT id FROM beats WHERE slug = ?').get(v.beat) as
-        | { id: number }
-        | undefined;
-      ins.run(v.title, v.description, 'youtube', v.url, b ? Number(b.id) : null);
     }
   }
 
@@ -487,11 +468,11 @@ export function exec(sql: string) {
 export const DEFAULT_SETTINGS: Record<string, string> = {
   studio_name: 'PROJECT 1',
   producer_name: 'Nathaniel Sasuosei',
-  tagline: 'Premium beats for serious artists',
-  hero_headline: 'SOUND THAT',
-  hero_headline_accent: 'MOVES CROWDS',
+  tagline: 'Beats and studio work from Accra',
+  hero_headline: 'FIND A BEAT.',
+  hero_headline_accent: 'MAKE IT YOURS.',
   hero_sub:
-    'Buy exclusive Afrobeat, Drill, Amapiano and Trap instrumentals. Pay with Mobile Money or bank transfer and get your files in your inbox instantly.',
+    'Listen through original Afrobeat, Drill and Amapiano instrumentals, check the licence options, then get the files by email after checkout.',
   email_from: 'Project 1 <onboarding@resend.dev>',
   support_email: 'hello@beatvault.gh',
   currency: 'GHS',

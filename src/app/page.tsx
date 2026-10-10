@@ -5,7 +5,7 @@ import BeatGrid from '@/components/BeatGrid';
 import Reveal from '@/components/Reveal';
 import VideoCard from '@/components/VideoCard';
 import { getSettings } from '@/lib/db';
-import { listBeats, listVideos, siteStats } from '@/lib/queries';
+import { listBeats, listVideos } from '@/lib/queries';
 import { playableBeats } from '@/lib/preview';
 import { depositPercent, listStudioServices, servicePriceSummary } from '@/lib/studio';
 import { formatMoney } from '@/lib/utils';
@@ -49,7 +49,7 @@ export default function HomePage() {
   const beats = listBeats();
   const previews = playableBeats(beats);
   const videos = listVideos(3);
-  const stats = siteStats();
+  const stats = { beats: beats.length };
   const heroBeat = beats.find((b) => b.featured) || beats[0] || null;
   const percent = depositPercent();
   // One source of truth for studio pricing: the same rows the booking engine uses.
@@ -85,19 +85,16 @@ export default function HomePage() {
         settings={settings}
         beat={heroBeat}
         tracks={previews}
-        showreelUrl={videos[0]?.video_url || ''}
         stats={stats}
       />
 
       {/* ---------------- every beat ---------------- */}
       <section className="container-x py-20 sm:py-28">
         <SectionHeading
-          eyebrow="The full catalogue"
-          title="Every"
-          accent="instrumental"
-          sub={`${beats.length} beat${beats.length === 1 ? '' : 's'} listed with a playable preview${
-            previews.length !== beats.length ? ` (${previews.length} with audio uploaded so far)` : ''
-          }. Hit play on any cover, then pick the licence that fits your release.`}
+          eyebrow="The catalogue"
+          title="Original beats,"
+          accent="ready to hear."
+          sub={`${beats.length} instrumental${beats.length === 1 ? '' : 's'} available. Listen to the preview, check the licence options, and choose what works for your release.`}
           action={
             <div className="flex flex-wrap gap-2">
               <Link href="/previews" className="btn-red !px-6 !py-3 text-xs">
@@ -117,13 +114,13 @@ export default function HomePage() {
         <section className="relative overflow-hidden border-y border-white/[.06] bg-ink-850/50 py-20 sm:py-28">
           <div className="container-x relative">
             <SectionHeading
-              eyebrow="Studio feed"
-              title="Watch the"
-              accent="process"
-              sub="Beat breakdowns, studio sessions and live sets."
+              eyebrow="From the room"
+              title="A look at"
+              accent="the work."
+              sub="Session clips, beat breakdowns and other things happening in the studio."
               action={
-                <Link href="/videos" className="btn-ghost !px-6 !py-3 text-xs">
-                  All videos →
+                <Link href="/videos" className="btn-ghost !px-5 !py-3 text-xs">
+                  More videos →
                 </Link>
               }
             />
@@ -141,16 +138,14 @@ export default function HomePage() {
       {/* ---------------- studio services ---------------- */}
       <section
         id="studio"
-        className="relative isolate scroll-mt-24 overflow-hidden border-t border-white/[.06] bg-ink-850/25"
+        className="scroll-mt-24 border-t border-white/[.10] bg-ink-850/35"
       >
-        <div className="pointer-events-none absolute -right-28 -top-32 h-[420px] w-[420px] rounded-full bg-brand-700/10 blur-[120px]" />
-        <div className="pointer-events-none absolute -bottom-40 -left-24 h-[360px] w-[360px] rounded-full bg-brand-950/30 blur-[110px]" />
-        <div className="container-x relative py-20 sm:py-28">
+        <div className="container-x py-20 sm:py-24">
           <SectionHeading
-            eyebrow="Studio services"
-            title="From first take to"
-            accent="final master"
-            sub={`Recording, mixing and mastering for artists who want their records to feel finished and release-ready. Pay ${percent}% to lock a slot and settle the balance at the studio.`}
+            eyebrow="Studio work"
+            title="From the first take"
+            accent="to the final mix."
+            sub={`Recording, mixing and mastering sessions with ${settings.producer_name}. Pay ${percent}% to hold a time; settle the balance at the studio.`}
             action={
               <Link href="/studio" className="btn-ghost !px-6 !py-3 text-xs">
                 Studio calendar →
@@ -160,32 +155,27 @@ export default function HomePage() {
 
           <div className="grid gap-4 md:grid-cols-3">
             {services.map((service, index) => (
-              <Reveal key={service.title} delay={index * 90}>
-                <article className="group relative h-full overflow-hidden rounded-2xl border border-white/[.08] bg-black/[.35] p-6 transition-all duration-500 hover:-translate-y-1 hover:border-brand-500/30 hover:bg-ink-850/80">
-                  <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-brand-600/10 blur-3xl transition-colors duration-500 group-hover:bg-brand-500/20" />
-                  <div className="relative flex items-center justify-between">
-                    <span className="grid h-12 w-12 place-items-center rounded-xl border border-brand-500/20 bg-brand-950/40 text-brand-300 transition-colors group-hover:border-brand-500/40 group-hover:bg-brand-950/70">
+              <Reveal key={service.title} delay={index * 70}>
+                <article className="group h-full border-t border-white/[.14] py-5 transition-colors hover:border-brand-400">
+                  <div className="flex items-center justify-between">
+                    <span className="grid h-9 w-9 place-items-center border border-white/15 text-brand-200">
                       <StudioServiceIcon name={service.icon as 'recording' | 'mixing' | 'mastering'} />
                     </span>
-                    <span className="display text-3xl text-white/15 transition-colors group-hover:text-brand-500/35">
-                      {service.number}
-                    </span>
+                    <span className="font-serif text-lg italic text-white/35">{service.number}</span>
                   </div>
-                  <div className="relative mt-7 text-[10px] font-bold uppercase tracking-[.18em] text-brand-300">
+                  <div className="mt-6 text-[10px] font-medium uppercase tracking-[.13em] text-brand-300">
                     {service.rate}
                   </div>
-                  <h3 className="display relative mt-2 text-2xl text-white">{service.title}</h3>
-                  <p className="relative mt-3 min-h-[72px] text-sm leading-6 text-white/50">
+                  <h3 className="display mt-2 text-2xl text-white">{service.title}</h3>
+                  <p className="mt-3 min-h-[72px] text-sm leading-6 text-white/55">
                     {service.description}
                   </p>
-                  <div className="relative mt-6 flex flex-wrap gap-2 border-t border-white/[.07] pt-5">
+                  <ul className="mt-5 space-y-1 border-t border-white/[.09] pt-4">
                     {service.details.map((detail) => (
-                      <span key={detail} className="chip text-[9px]">
-                        {detail}
-                      </span>
+                      <li key={detail} className="text-[11px] leading-5 text-white/50">{detail}</li>
                     ))}
-                  </div>
-                  <div className="relative mt-6 flex flex-wrap gap-2">
+                  </ul>
+                  <div className="mt-5 flex flex-wrap gap-2">
                     <Link
                       href={service.bookable ? `/studio?service=${service.slug}` : `/contact?service=${service.title.toLowerCase()}`}
                       aria-label={
@@ -193,19 +183,19 @@ export default function HomePage() {
                           ? `Book a ${service.title} session`
                           : `Enquire about ${service.title}`
                       }
-                      className="btn-red flex-1 !justify-between !rounded-xl !px-4 !py-3 text-xs"
+                      className="btn-red flex-1 !justify-between !px-4 !py-3 text-xs"
                     >
                       {service.bookLabel}
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                         <path d="M5 12h14M13 6l6 6-6 6" />
                       </svg>
                     </Link>
                     {service.bookable && (
                       <Link
                         href={`/contact?service=${service.title.toLowerCase()}`}
-                        className="btn-ghost !rounded-xl !px-4 !py-3 text-xs"
+                        className="btn-ghost !px-3 !py-3 text-xs"
                       >
-                        Ask a question
+                        Ask first
                       </Link>
                     )}
                   </div>
@@ -215,20 +205,16 @@ export default function HomePage() {
           </div>
 
           <Reveal delay={120}>
-            <div className="mt-7 flex flex-col gap-5 rounded-3xl border border-brand-500/20 bg-gradient-to-r from-brand-950/40 via-ink-900/80 to-ink-900/70 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+            <div className="mt-8 flex flex-col gap-5 border-t border-white/[.11] py-6 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[.18em] text-brand-300">
-                  Ready for the next step?
-                </div>
-                <h3 className="display mt-2 text-xl text-white">Tell us what your track needs.</h3>
-                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/50">
-                  Share a demo, a reference, or where you are in the process and we&apos;ll help you
-                  choose the right studio service.
+                <h3 className="display text-xl text-white">Not sure what you need?</h3>
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/55">
+                  Send a rough mix or a reference track. We can talk through recording, mixing, or mastering before you book.
                 </p>
               </div>
-              <Link href="/contact" className="btn-red shrink-0 !px-6 !py-3 text-xs">
-                Contact the studio
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <Link href="/contact" className="btn-ghost shrink-0 !px-5 !py-3 text-xs">
+                Ask the studio
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </Link>

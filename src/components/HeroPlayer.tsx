@@ -177,27 +177,11 @@ export default function HeroPlayer({
   );
 
   return (
-    <div className="relative">
-      {/* spinning vinyl behind the artwork */}
-      <div
-        className={`pointer-events-none absolute -right-6 -top-8 h-40 w-40 rounded-full opacity-70 ${
-          playing ? 'spin-slow' : ''
-        }`}
-        style={{
-          background:
-            'repeating-radial-gradient(circle at 50% 50%, #141418 0 2px, #0b0b0e 2px 4px)',
-          boxShadow: '0 30px 80px -30px rgba(255,45,58,.6)',
-        }}
-      />
-      <div className="pointer-events-none absolute -left-8 bottom-6 h-24 w-24 rounded-full bg-brand-600/25 blur-2xl" />
-
-      <div className="relative animate-fade-up rounded-[26px] border border-white/10 bg-ink-850/80 p-5 backdrop-blur-xl red-glow">
-        <div className="flex items-center justify-between">
-          <span className="chip border-brand-500/30 bg-brand-950/60 text-brand-300">
-            <span
-              className={`h-1.5 w-1.5 rounded-full bg-brand-400 ${playing ? 'animate-pulse' : ''}`}
-            />
-            Now previewing
+    <div className="relative border border-white/[.14] bg-ink-850 p-4 sm:p-5">
+      <div className="flex items-center justify-between border-b border-white/[.10] pb-3">
+          <span className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-white/60">
+            <span className={`h-1.5 w-1.5 rounded-full bg-brand-400 ${playing ? 'animate-pulse' : ''}`} />
+Beat preview
           </span>
           <div className="flex items-center gap-2.5">
             {list.length > 1 && (
@@ -222,20 +206,20 @@ export default function HeroPlayer({
         </div>
 
         <div className="mt-5 flex items-center gap-4">
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl">
+          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-sm border border-white/10">
             <CoverArt beat={active as any} className="h-full w-full object-cover" />
           </div>
           <div className="min-w-0">
             <Link
               href={`/beats/${active.slug}`}
-              className="block truncate text-lg font-black text-white hover:text-brand-300"
+              className="display block truncate text-[22px] text-white transition-colors hover:text-brand-200"
             >
               {active.title}
             </Link>
-            <div className="mt-1 truncate text-[11px] uppercase tracking-[.16em] text-white/40">
+            <div className="mt-1 truncate text-[10px] uppercase tracking-[.12em] text-white/45">
               {active.genre} · {active.bpm} BPM · {active.musical_key}
             </div>
-            <div className="display mt-2 text-2xl text-white">{money(active.price_basic)}</div>
+            <div className="mt-2 text-sm font-medium text-brand-200">{money(active.price_basic)} <span className="text-[11px] font-normal text-white/40">starting price</span></div>
           </div>
         </div>
 
@@ -248,7 +232,7 @@ export default function HeroPlayer({
               onClick={() => step(-1)}
               disabled={activeIndex === 0}
               aria-label="Previous preview"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white disabled:opacity-30"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-white/35 hover:text-white disabled:opacity-30"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M6 5h2v14H6zM20 5.2v13.6a1 1 0 0 1-1.53.85L8.27 12.9a1 1 0 0 1 0-1.7l10.2-6.8A1 1 0 0 1 20 5.2Z" />
@@ -257,7 +241,7 @@ export default function HeroPlayer({
           )}
           <button
             onClick={toggleQueue}
-            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-500 text-white shadow-[0_10px_30px_-8px_rgba(255,45,58,.9)] transition hover:scale-105"
+            className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand-600 text-white transition-colors hover:bg-brand-500"
             aria-label={playing ? 'Pause' : 'Play previews'}
           >
             {playing ? (
@@ -276,7 +260,7 @@ export default function HeroPlayer({
               onClick={() => step(1)}
               disabled={activeIndex >= list.length - 1}
               aria-label="Next preview"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-white/70 transition hover:text-white disabled:opacity-30"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/15 text-white/70 transition-colors hover:border-white/35 hover:text-white disabled:opacity-30"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M16 5h2v14h-2zM4 5.2v13.6a1 1 0 0 0 1.53.85l10.2-6.8a1 1 0 0 0 0-1.7L5.53 4.35A1 1 0 0 0 4 5.2Z" />
@@ -286,7 +270,7 @@ export default function HeroPlayer({
           <div className="min-w-0 flex-1">
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-600 transition-[width] duration-200"
+                className="h-full rounded-full bg-brand-500 transition-[width] duration-200"
                 style={{ width: `${Math.min(100, progress)}%` }}
               />
             </div>
@@ -327,13 +311,13 @@ export default function HeroPlayer({
           <div className="mt-5 border-t border-white/[.07] pt-4">
             <div className="mb-2 flex items-center justify-between gap-3">
               <span className="text-[10px] font-bold uppercase tracking-[.18em] text-white/35">
-                Every beat preview
+                Preview queue
               </span>
               <button
                 onClick={playAll}
                 className="shrink-0 text-[10px] font-bold uppercase tracking-[.14em] text-brand-300 transition hover:text-brand-200"
               >
-                Audition all →
+                Play all →
               </button>
             </div>
             <ul className="no-scrollbar -mx-1 max-h-[188px] space-y-0.5 overflow-y-auto px-1">
@@ -344,11 +328,11 @@ export default function HeroPlayer({
                     <button
                       onClick={() => toggleTrack(t)}
                       aria-current={isActive ? 'true' : undefined}
-                      className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-white/5"
-                      style={isActive ? { background: 'rgba(255,45,58,.14)' } : undefined}
+                      className="group flex w-full items-center gap-3 rounded-sm px-2 py-2 text-left transition-colors hover:bg-white/[.05]"
+                      style={isActive ? { background: 'rgba(185,96,66,.16)' } : undefined}
                     >
                       <span
-                        className={`grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[10px] font-black tabular-nums ${
+                        className={`grid h-6 w-6 shrink-0 place-items-center rounded-sm text-[10px] font-semibold tabular-nums ${
                           isActive ? 'bg-brand-500 text-white' : 'bg-white/5 text-white/40'
                         }`}
                       >
@@ -388,7 +372,6 @@ export default function HeroPlayer({
             </ul>
           </div>
         )}
-      </div>
     </div>
   );
 }

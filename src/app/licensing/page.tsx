@@ -43,14 +43,14 @@ export default function LicensingPage() {
     <div className="container-x py-14 sm:py-20">
       <Reveal>
         <div className="mb-12">
-          <div className="mb-3 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[.22em] text-brand-400">
-            <span className="h-[2px] w-7 bg-brand-500" />
-            Know what you own
+          <div className="mb-3 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.16em] text-brand-300">
+            <span className="h-px w-7 bg-brand-500" />
+            Before you buy
           </div>
           <h1 className="display text-[clamp(2.2rem,6vw,4.4rem)] text-white">
-            LICENSING <span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">EXPLAINED</span>
+            Understand the <span className="font-normal italic text-brand-300">licences.</span>
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/45">
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60">
             Every beat comes with four licence options. Pick the one that matches how far you plan
             to push the record — you can upgrade later if it blows up.
           </p>
@@ -91,7 +91,7 @@ export default function LicensingPage() {
       <section className="mt-20">
         <Reveal>
           <h2 className="display mb-8 text-2xl text-white">
-            COMMON <span className="text-brand-500">QUESTIONS</span>
+            A few common questions
           </h2>
         </Reveal>
         <div className="grid gap-4 md:grid-cols-2">

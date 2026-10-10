@@ -248,40 +248,48 @@ function renderBeat(b) {
 }
 
 function coverSvg(b) {
-  const hue = 348 + ((b.title.length * 7) % 24) - 12;
+  const palettes = {
+    Afrobeats: '#b96a4d',
+    Drill: '#9aa99f',
+    Amapiano: '#c1a461',
+    Trap: '#9b7774',
+    'Afro Drill': '#a95037',
+    'R&B': '#ad8270',
+    Highlife: '#c39b54',
+  };
+  const accent = palettes[b.genre] || '#b96042';
   const words = b.title.toUpperCase().split(' ');
-  const line1 = words.slice(0, Math.ceil(words.length / 2)).join(' ');
-  const line2 = words.slice(Math.ceil(words.length / 2)).join(' ');
+  const splitAt = Math.ceil(words.length / 2);
+  const line1 = words.slice(0, splitAt).join(' ');
+  const line2 = words.slice(splitAt).join(' ');
+  const escapeXml = (text) =>
+    text.replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&apos;',
+    })[char]);
+  const titleY = line2 ? 635 : 685;
+  const number = String(BEATS.indexOf(b) + 1).padStart(2, '0');
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="hsl(${hue} 92% 42%)"/>
-      <stop offset="45%" stop-color="hsl(${hue - 6} 78% 16%)"/>
-      <stop offset="100%" stop-color="#08080a"/>
-    </linearGradient>
-    <radialGradient id="r" cx="22%" cy="14%" r="80%">
-      <stop offset="0%" stop-color="hsl(${hue + 8} 96% 62%)" stop-opacity=".55"/>
-      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3"/></filter>
-  </defs>
-  <rect width="800" height="800" fill="url(#g)"/>
-  <rect width="800" height="800" fill="url(#r)"/>
-  <g fill="none" stroke="#ffffff" stroke-opacity=".07">
-    ${Array.from({ length: 26 }, (_, i) => `<circle cx="620" cy="180" r="${i * 16}" />`).join('')}
-  </g>
-  <g stroke="#ffffff" stroke-opacity=".16" stroke-width="2">
-    ${Array.from(
-      { length: 40 },
-      (_, i) =>
-        `<line x1="${i * 20 + 40}" y1="${Math.round(560 + Math.sin(i * 0.7) * 40)}" x2="${i * 20 + 40}" y2="${Math.round(660 + Math.cos(i * 0.5) * 50)}"/>`,
-    ).join('')}
-  </g>
-  <rect width="800" height="800" filter="url(#n)" opacity=".07"/>
-  <text x="56" y="${line2 ? 660 : 700}" font-family="Arial Black, Arial, sans-serif" font-size="76" font-weight="900" fill="#ffffff" letter-spacing="-2">${line1}</text>
-  ${line2 ? `<text x="56" y="742" font-family="Arial Black, Arial, sans-serif" font-size="76" font-weight="900" fill="#ff2d3a" letter-spacing="-2">${line2}</text>` : ''}
-  <text x="60" y="88" font-family="Arial, sans-serif" font-size="26" font-weight="bold" fill="#ffffff" fill-opacity=".75" letter-spacing="8">${b.genre.toUpperCase()}</text>
-  <text x="60" y="126" font-family="Arial, sans-serif" font-size="20" fill="#ffffff" fill-opacity=".45" letter-spacing="4">${b.bpm} BPM · ${b.mood.toUpperCase()}</text>
+  <rect width="800" height="800" fill="#191814"/>
+  <rect x="28" y="28" width="744" height="744" fill="none" stroke="#eee9df" stroke-opacity=".18"/>
+  <text x="58" y="78" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#eee9df" fill-opacity=".72" letter-spacing="4">PROJECT 1 / ${escapeXml(b.genre.toUpperCase())}</text>
+  <text x="742" y="78" text-anchor="end" font-family="Arial, sans-serif" font-size="18" fill="#eee9df" fill-opacity=".5" letter-spacing="3">${number}</text>
+  <circle cx="536" cy="330" r="248" fill="#211f1a" stroke="#eee9df" stroke-opacity=".14" stroke-width="2"/>
+  <circle cx="536" cy="330" r="224" fill="none" stroke="#eee9df" stroke-opacity=".09"/>
+  <circle cx="536" cy="330" r="198" fill="none" stroke="#eee9df" stroke-opacity=".07"/>
+  <circle cx="536" cy="330" r="171" fill="none" stroke="#eee9df" stroke-opacity=".06"/>
+  <circle cx="536" cy="330" r="140" fill="none" stroke="#eee9df" stroke-opacity=".07"/>
+  <circle cx="536" cy="330" r="56" fill="${accent}"/>
+  <circle cx="536" cy="330" r="8" fill="#191814"/>
+  <path d="M58 530h684" stroke="#eee9df" stroke-opacity=".25"/>
+  <rect x="58" y="510" width="54" height="4" fill="${accent}"/>
+  <text x="58" y="${titleY}" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="600" fill="#f1ece2" letter-spacing="-2">${escapeXml(line1)}</text>
+  ${line2 ? `<text x="58" y="715" font-family="Georgia, 'Times New Roman', serif" font-size="68" font-style="italic" fill="${accent}" letter-spacing="-2">${escapeXml(line2)}</text>` : ''}
+  <text x="60" y="748" font-family="Arial, sans-serif" font-size="17" fill="#eee9df" fill-opacity=".56" letter-spacing="3">${b.bpm} BPM · ${escapeXml(b.mood.toUpperCase())}</text>
 </svg>`;
 }
 

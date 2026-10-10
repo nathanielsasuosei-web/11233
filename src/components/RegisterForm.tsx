@@ -53,7 +53,7 @@ export default function RegisterForm() {
 
   return (
     <div ref={cardRef} className={`card auth-stagger p-7 ${success ? 'auth-success' : ''}`}>
-      <h2 className="display text-2xl text-white">CREATE ACCOUNT</h2>
+      <h2 className="display text-2xl text-white">Create an account</h2>
       <p className="mt-2 text-[13px] text-white/45">
         Free, and it takes about 30 seconds.
       </p>

@@ -38,7 +38,7 @@ export default function DashboardMessageForm({
 
   return (
     <form onSubmit={submit} className="card space-y-4 p-6">
-      <h2 className="display text-lg text-white">NEW MESSAGE</h2>
+      <h2 className="display text-lg text-white">Send a message</h2>
       <div>
         <label className="label">Subject</label>
         <input
