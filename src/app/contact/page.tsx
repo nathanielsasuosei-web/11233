@@ -25,28 +25,34 @@ export default async function ContactPage({
     : undefined;
 
   const cards = [
-    { icon: '✉️', label: 'Email', value: s.support_email, href: `mailto:${s.support_email}` },
-    { icon: '📱', label: 'Mobile Money enquiries', value: s.momo_number, href: `tel:${s.momo_number.replace(/\s/g, '')}` },
-    {
-      icon: '🏦',
-      label: 'Bank transfer',
-      value: `${s.bank_name} · ${s.bank_account_number}`,
-      sub: s.bank_account_name,
-    },
+    ...(s.support_email
+      ? [{ icon: '@', label: 'Email', value: s.support_email, href: `mailto:${s.support_email}` }]
+      : []),
+    ...(s.momo_number && s.momo_number.replace(/\s/g, '') !== '0550000000'
+      ? [{ icon: '☎', label: 'Mobile Money enquiries', value: s.momo_number, href: `tel:${s.momo_number.replace(/\s/g, '')}` }]
+      : []),
+    ...(s.bank_account_number && !/^0+$/.test(s.bank_account_number.replace(/\D/g, ''))
+      ? [{
+          icon: '↗',
+          label: 'Bank transfer',
+          value: `${s.bank_name} · ${s.bank_account_number}`,
+          sub: s.bank_account_name,
+        }]
+      : []),
   ];
 
   return (
     <div className="container-x py-14 sm:py-20">
       <Reveal>
         <div className="mb-10">
-          <div className="mb-3 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[.22em] text-brand-400">
-            <span className="h-[2px] w-7 bg-brand-500" />
-            Let&apos;s work
+          <div className="mb-3 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.16em] text-brand-300">
+            <span className="h-px w-7 bg-brand-500" />
+            Contact
           </div>
           <h1 className="display text-[clamp(2.2rem,6vw,4.4rem)] text-white">
-            GET IN <span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">TOUCH</span>
+            Talk to the <span className="font-normal italic text-brand-300">studio.</span>
           </h1>
-          <p className="mt-3 max-w-xl text-sm text-white/45">
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/60">
             Custom production, mixing, mastering, or a question about an order — send a message and
             you&apos;ll get a reply by email.
           </p>
@@ -58,7 +64,7 @@ export default async function ContactPage({
           <div className="space-y-4">
             {cards.map((c) => (
               <div key={c.label} className="card flex items-start gap-4 p-5">
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-brand-500/20 bg-brand-950/40 text-lg">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-sm border border-brand-500/25 text-base font-serif text-brand-200">
                   {c.icon}
                 </span>
                 <div className="min-w-0">
@@ -81,14 +87,12 @@ export default async function ContactPage({
             ))}
 
             <div className="rounded-2xl border border-brand-500/20 bg-brand-950/30 p-5">
-              <div className="display text-sm text-white">Faster than email?</div>
-              <p className="mt-2 text-[12px] leading-relaxed text-white/50">
-                Buying a beat? Skip the wait —{' '}
-                <Link href="/beats" className="text-brand-300 hover:underline">
-                  browse the catalogue
+              <div className="display text-sm text-white">Looking for a beat?</div>
+              <p className="mt-2 text-[12px] leading-relaxed text-white/55">
+                The catalogue has previews and licence details for each track.{' '}
+                <Link href="/beats" className="text-brand-200 hover:underline">
+                  Take a look.
                 </Link>
-                , pay with Mobile Money or bank transfer and the files land in your inbox within
-                seconds.
               </p>
             </div>
           </div>

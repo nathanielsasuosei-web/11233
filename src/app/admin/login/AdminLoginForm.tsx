@@ -27,7 +27,7 @@ export default function AdminLoginForm() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Login failed');
       setSuccess(true);
-      toast('Welcome back, producer 🎛️');
+      toast('Welcome back, producer.');
       setTimeout(() => {
         router.push('/admin');
         router.refresh();
@@ -43,14 +43,10 @@ export default function AdminLoginForm() {
   return (
     <div ref={cardRef} className={`card auth-stagger w-full max-w-md p-8 ${success ? 'auth-success' : ''}`}>
       <div className="mb-7 text-center">
-        <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-400 to-brand-700">
-          <span className="flex items-end gap-[2px]">
-            <span className="eq-bar h-3 w-[2px] bg-white" />
-            <span className="eq-bar h-5 w-[2px] bg-white" style={{ animationDelay: '140ms' }} />
-            <span className="eq-bar h-3.5 w-[2px] bg-white" style={{ animationDelay: '280ms' }} />
-          </span>
+        <div className="mx-auto mb-4 grid h-12 w-12 place-items-center border border-brand-500/45 font-serif text-base text-white">
+          P<span className="text-brand-300">1</span>
         </div>
-        <h1 className="display text-2xl text-white">PRODUCER LOGIN</h1>
+        <h1 className="display text-2xl text-white">Producer sign in</h1>
         <p className="mt-2 text-[13px] text-white/45">
           Manage beats, videos, orders and payouts.
         </p>
@@ -65,7 +61,7 @@ export default function AdminLoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="input"
-            placeholder="admin@beatvault.gh"
+            placeholder="Email address"
           />
         </div>
         <div>
@@ -88,15 +84,7 @@ export default function AdminLoginForm() {
         />
       </form>
 
-      <button
-        onClick={() => {
-          setEmail('admin@beatvault.gh');
-          setPassword('admin123');
-        }}
-        className="mt-3 w-full rounded-xl border border-dashed border-white/10 py-2.5 text-[11px] font-semibold text-white/35 transition hover:border-brand-500/40 hover:text-brand-300"
-      >
-        Fill in the demo producer account
-      </button>
+
 
       <p className="mt-6 text-center text-[11px] leading-relaxed text-white/25">
         Looking for beats?{' '}

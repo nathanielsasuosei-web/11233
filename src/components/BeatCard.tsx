@@ -41,23 +41,25 @@ function fmtTime(s: number) {
 export function CoverArt({ beat, className = '' }: { beat: BeatLite; className?: string }) {
   const [broken, setBroken] = useState(false);
   if (broken || !beat.cover_url) {
-    // Generated fallback artwork so the grid never looks empty.
-    const hue = ((beat.id * 47) % 40) - 10;
+    // A quiet sleeve-like fallback, rather than a synthetic gradient poster.
+    const accents = ['#b96042', '#84917c', '#c09b5c', '#9a766c'];
+    const accent = accents[Math.abs(beat.id) % accents.length];
     return (
-      <div
-        className={`relative grid place-items-center overflow-hidden ${className}`}
-        style={{
-          background: `radial-gradient(120% 120% at 20% 10%, hsl(${348 + hue / 4} 90% 32%), #0b0b0e 70%), linear-gradient(135deg,#1a0a0e,#08080a)`,
-        }}
-      >
-        <div className="grid-bg absolute inset-0 opacity-40" />
-        <div className="relative px-3 text-center">
-          <div className="display text-[clamp(1.4rem,4vw,2.6rem)] leading-[.85] text-white/90">
-            {beat.title.slice(0, 12).toUpperCase()}
-          </div>
-          <div className="mt-1 text-[10px] font-bold uppercase tracking-[.3em] text-brand-400">
-            {beat.genre}
-          </div>
+      <div className={`relative grid place-items-center overflow-hidden bg-[#1c1b17] ${className}`}>
+        <div
+          className="absolute right-[-11%] top-[5%] aspect-square w-[82%] rounded-full border border-white/[.09]"
+          style={{
+            background: 'repeating-radial-gradient(circle at center, #24231e 0 2px, #1c1b17 3px 5px)',
+          }}
+        >
+          <span
+            className="absolute left-1/2 top-1/2 h-[18%] w-[18%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ background: accent }}
+          />
+        </div>
+        <div className="absolute inset-x-0 bottom-0 border-t border-white/[.12] bg-[#171612]/95 px-4 py-4 text-left">
+          <div className="text-[9px] font-medium uppercase tracking-[.16em] text-white/45">{beat.genre}</div>
+          <div className="display mt-1 text-[clamp(1.2rem,3vw,2rem)] leading-none text-white">{beat.title}</div>
         </div>
       </div>
     );
@@ -173,7 +175,7 @@ export default function BeatCard({
 
   return (
     <div
-      className={`group relative rounded-2xl border border-white/[.07] bg-ink-850 transition-all duration-500 hover:-translate-y-1 hover:border-brand-500/40 hover:shadow-[0_24px_60px_-30px_rgba(255,45,58,.55)] ${
+      className={`group relative rounded-sm border border-white/[.11] bg-ink-850 transition-colors duration-200 hover:border-brand-400/55 ${
         layout === 'list' ? 'flex items-center overflow-visible' : 'overflow-hidden'
       }`}
     >
@@ -181,12 +183,12 @@ export default function BeatCard({
 
       <div
         className={`relative aspect-square overflow-hidden bg-ink-900 ${
-          layout === 'list' ? 'w-28 shrink-0 rounded-l-[15px] sm:w-36 lg:w-40' : ''
+          layout === 'list' ? 'w-28 shrink-0 sm:w-36 lg:w-40' : ''
         }`}
       >
         <CoverArt
           beat={beat}
-          className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-110"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/25 to-transparent" />
 
@@ -206,12 +208,12 @@ export default function BeatCard({
         <button
           onClick={toggle}
           aria-label={playing ? 'Pause preview' : 'Play preview'}
-          className={`absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-white transition-all duration-300 ${
-            layout === 'list' ? 'h-12 w-12' : 'h-16 w-16'
+          className={`absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-white transition-colors duration-200 ${
+            layout === 'list' ? 'h-11 w-11' : 'h-14 w-14'
           } ${
             playing
-              ? 'scale-100 bg-brand-500 shadow-[0_0_50px_-6px_rgba(255,45,58,.9)]'
-              : 'scale-90 bg-black/45 opacity-90 backdrop-blur hover:scale-100 hover:bg-brand-500 group-hover:opacity-100'
+              ? 'bg-brand-600'
+              : 'bg-black/60 opacity-90 group-hover:bg-brand-600 group-hover:opacity-100'
           }`}
         >
           {playing ? (
@@ -223,9 +225,6 @@ export default function BeatCard({
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
               <path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.2-6.8a1 1 0 0 0 0-1.7L9.53 4.35A1 1 0 0 0 8 5.2Z" />
             </svg>
-          )}
-          {playing && (
-            <span className="pointer-events-none absolute inset-0 animate-pulse-ring rounded-full border-2 border-brand-400/70" />
           )}
         </button>
 
@@ -285,7 +284,7 @@ export default function BeatCard({
             {menu && (
               <>
                 <div className="fixed inset-0 z-30" onClick={() => setMenu(false)} />
-                <div className="absolute bottom-[calc(100%+10px)] right-0 z-40 w-[268px] animate-fade-up overflow-hidden rounded-2xl border border-white/10 bg-ink-800 p-1.5 shadow-2xl">
+                <div className="absolute bottom-[calc(100%+10px)] right-0 z-40 w-[268px] animate-fade-up overflow-hidden rounded-sm border border-white/15 bg-ink-800 p-1.5 shadow-xl">
                   <div className="px-2.5 py-2 text-[10px] font-bold uppercase tracking-[.16em] text-white/40">
                     Choose a licence
                   </div>
@@ -296,7 +295,7 @@ export default function BeatCard({
                       <button
                         key={k}
                         onClick={() => addToCart(k)}
-                        className="flex w-full items-center justify-between gap-3 rounded-xl px-2.5 py-2.5 text-left transition hover:bg-brand-500/15"
+                        className="flex w-full items-center justify-between gap-3 rounded-sm px-2.5 py-2.5 text-left transition-colors hover:bg-white/[.06]"
                       >
                         <span>
                           <span className="block text-[13px] font-semibold text-white">
@@ -315,7 +314,7 @@ export default function BeatCard({
                   <Link
                     href={`/beats/${beat.slug}`}
                     onClick={() => setMenu(false)}
-                    className="mt-1 block rounded-xl px-2.5 py-2.5 text-[12px] font-semibold text-white/50 transition hover:bg-white/5 hover:text-white"
+                    className="mt-1 block rounded-sm px-2.5 py-2.5 text-[12px] font-semibold text-white/50 transition hover:bg-white/5 hover:text-white"
                   >
                     View full details →
                   </Link>

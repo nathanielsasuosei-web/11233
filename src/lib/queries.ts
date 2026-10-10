@@ -105,7 +105,9 @@ export function listVideos(limit = 12) {
   }>(
     `SELECT v.*, b.title as beat_title, b.slug as beat_slug
      FROM videos v LEFT JOIN beats b ON b.id = v.beat_id
-     WHERE v.published = 1 ORDER BY v.id DESC LIMIT ?`,
+     WHERE v.published = 1
+       AND (v.description IS NULL OR v.description NOT LIKE 'Demo placeholder:%')
+     ORDER BY v.id DESC LIMIT ?`,
     [limit],
   );
 }

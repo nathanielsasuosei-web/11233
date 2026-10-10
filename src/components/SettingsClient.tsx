@@ -7,7 +7,7 @@ import { useToast } from '@/components/Toast';
 const FIELDS: { section: string; key: string; label: string; placeholder?: string; help?: string; type?: string }[] = [
   { section: 'Studio', key: 'studio_name', label: 'Studio / brand name', placeholder: 'PROJECT 1' },
   { section: 'Studio', key: 'producer_name', label: 'Producer name', placeholder: 'Nathaniel Sasuosei' },
-  { section: 'Studio', key: 'tagline', label: 'Tagline', placeholder: 'Premium beats for serious artists' },
+  { section: 'Studio', key: 'tagline', label: 'Tagline', placeholder: 'Beats and studio work from Accra' },
   { section: 'Studio', key: 'support_email', label: 'Public support email', placeholder: 'hello@beatvault.gh' },
 
   { section: 'Homepage', key: 'hero_headline', label: 'Hero headline (line 1)', placeholder: 'SOUND THAT' },

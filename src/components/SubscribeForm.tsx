@@ -21,7 +21,7 @@ export default function SubscribeForm() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Could not subscribe');
       setDone(true);
-      toast("You're on the list — new drops land in your inbox");
+      toast('Thanks — we have your email.');
     } catch (err: any) {
       toast(err.message || 'Could not subscribe', 'err');
     } finally {
@@ -32,7 +32,7 @@ export default function SubscribeForm() {
   if (done) {
     return (
       <p className="text-[13px] text-brand-300">
-        Thanks — you&apos;ll hear about new beats first. 🎧
+        Thanks — we&apos;ll be in touch when there is something to share.
       </p>
     );
   }

@@ -51,24 +51,19 @@ export default async function StudioPage({
   const bookable = bookingEnabled() && services.length > 0;
 
   return (
-    <div className="relative overflow-hidden">
-      <div className="pointer-events-none absolute -right-24 top-10 h-[420px] w-[420px] rounded-full bg-brand-700/12 blur-[130px]" />
-      <div className="container-x relative py-14 sm:py-20">
-        {/* ---------- header ---------- */}
-        <Reveal>
-          <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <div className="mb-3 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[.22em] text-brand-400">
-                <span className="h-[2px] w-7 bg-brand-500" />
-                Studio bookings · {settings.studio_address?.split('—')[0] || 'Accra, Ghana'}
-              </div>
-              <h1 className="display text-[clamp(2.2rem,6vw,4.4rem)] text-white">
-                BOOK YOUR{' '}
-                <span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">
-                  SESSION
-                </span>
-              </h1>
-              <p className="mt-4 text-sm leading-relaxed text-white/50">
+    <div className="container-x py-14 sm:py-20">
+      {/* ---------- header ---------- */}
+      <Reveal>
+        <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-3 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.16em] text-brand-300">
+              <span className="h-px w-7 bg-brand-500" />
+              Studio · {settings.studio_address?.split('—')[0] || 'By appointment'}
+            </div>
+            <h1 className="display text-[clamp(2.2rem,6vw,4.4rem)] text-white">
+              Book a studio <span className="font-normal italic text-brand-300">session.</span>
+            </h1>
+              <p className="mt-4 text-sm leading-relaxed text-white/60">
                 Recording, mixing and mastering with {settings.producer_name}. Pick a slot, pay{' '}
                 <strong className="text-white/80">{percent}% now</strong> to lock it, and settle the
                 balance at the studio. Your confirmation is emailed the moment the deposit lands.
@@ -205,7 +200,6 @@ export default async function StudioPage({
             </Link>
           </div>
         )}
-      </div>
     </div>
   );
 }

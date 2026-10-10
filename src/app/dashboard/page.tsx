@@ -32,9 +32,9 @@ export default async function DashboardHome() {
             Your account
           </div>
           <h1 className="display text-[clamp(1.9rem,4.6vw,3rem)] text-white">
-            HELLO,{' '}
-            <span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">
-              {(user.artist_name || user.name).split(' ')[0].toUpperCase()}
+            Welcome back,{' '}
+            <span className="font-normal italic text-brand-300">
+              {(user.artist_name || user.name).split(' ')[0]}.
             </span>
           </h1>
           <p className="mt-3 text-sm text-white/45">
@@ -168,7 +168,7 @@ export default async function DashboardHome() {
       {/* suggestions */}
       <section>
         <h2 className="display mb-4 text-xl text-white">
-          YOU MIGHT <span className="text-brand-500">LIKE</span>
+          More beats <span className="font-normal italic text-brand-300">to hear.</span>
         </h2>
         <div className="grid gap-3 sm:grid-cols-3">
           {suggestions.map((b) => (

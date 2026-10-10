@@ -23,7 +23,7 @@ export default async function MessagesPage() {
           Studio inbox
         </div>
         <h1 className="display text-[clamp(1.9rem,4.6vw,3rem)] text-white">
-          MES<span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">SAGES</span>
+          Your <span className="font-normal italic text-brand-300">messages.</span>
         </h1>
         <p className="mt-3 text-sm text-white/45">
           Questions, custom orders and replies from the producer. Replies land in your email too.
@@ -35,7 +35,7 @@ export default async function MessagesPage() {
 
         <section>
           <h2 className="display mb-4 text-lg text-white">
-            YOUR <span className="text-brand-500">THREADS</span>
+            Your conversations
           </h2>
 
           {messages.length === 0 ? (

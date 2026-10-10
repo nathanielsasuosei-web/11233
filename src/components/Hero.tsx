@@ -1,111 +1,100 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import HeroCanvas from './HeroCanvas';
 import HeroPlayer, { type HeroBeat } from './HeroPlayer';
-import VideoModal from './VideoModal';
 
 export default function Hero({
   settings,
   beat,
   tracks = [],
-  showreelUrl,
   stats,
 }: {
   settings: Record<string, string>;
   beat: HeroBeat | null;
   /** Every beat preview, listed as a queue under the player. */
   tracks?: HeroBeat[];
-  showreelUrl: string;
-  stats: { beats: number; artists: number; sold: number };
+  stats: { beats: number };
 }) {
-  const [video, setVideo] = useState(false);
   const playerBeat = beat || tracks[0] || null;
+  const producer = settings.producer_name || 'Independent producer';
+  const studio = settings.studio_name || 'Project 1';
+  const tagline = (settings.tagline || 'Original beats and studio work').replace(/[.!?]+$/, '');
+  const address = settings.studio_address?.split('—')[0]?.trim();
 
   return (
-    <section className="relative min-h-[100svh] overflow-hidden bg-ink-900">
-      {/* ---------- background layers ---------- */}
-      <div className="grid-bg mask-fade-b absolute inset-0 opacity-60" />
-      <div className="absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full bg-brand-600/20 blur-[130px]" />
-      <div className="absolute -right-32 top-24 h-[460px] w-[460px] rounded-full bg-brand-800/25 blur-[120px]" />
-      <div className="absolute inset-x-0 bottom-0 h-[58%] animate-glow-sweep bg-[linear-gradient(120deg,transparent_20%,rgba(255,45,58,.10)_45%,transparent_70%)] bg-[length:200%_100%]" />
-      <HeroCanvas className="absolute inset-x-0 bottom-0 h-[58%] w-full" />
-      <div className="noise pointer-events-none absolute inset-0 opacity-[.035] mix-blend-overlay" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_0%,transparent_35%,rgba(8,8,10,.85)_100%)]" />
+    <section className="relative overflow-hidden border-b border-white/[.10] bg-ink-900">
+      <div className="container-x relative">
+        <div className="grid items-center gap-12 py-14 sm:py-20 lg:min-h-[660px] lg:grid-cols-[1.03fr_.97fr] lg:gap-14 lg:py-16 xl:gap-20">
+          <div className="max-w-2xl">
+            <div className="hero-enter mb-6 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[.17em] text-white/55" style={{ animationDelay: '40ms' }}>
+              <span className="h-px w-8 bg-brand-400" />
+              {studio}
+              <span className="text-white/25">/</span>
+              {address || 'Independent production'}
+            </div>
 
-      {/* ---------- content ---------- */}
-      <div className="container-x relative flex min-h-[100svh] flex-col justify-center pb-28 pt-28 sm:pb-32">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.1fr_.9fr]">
-          <div>
-            <div
-              className="animate-fade-up mb-8 flex flex-wrap items-center gap-3"
-              style={{ animationDelay: '60ms' }}
-            >
-              <Link href="/beats" className="btn-red !px-8 !py-4 text-sm">
-                Browse {stats.beats} beats
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <h1 className="hero-enter display max-w-[12ch] text-[clamp(3.1rem,7.2vw,6.4rem)] leading-[.94] text-white" style={{ animationDelay: '120ms' }}>
+              Find a beat.
+              <br />
+              <span className="font-normal italic text-brand-300">Make it yours.</span>
+            </h1>
+
+            <p className="hero-enter mt-7 max-w-xl text-[15px] leading-7 text-white/65 sm:text-base" style={{ animationDelay: '200ms' }}>
+              {tagline}. Listen through the catalogue,
+              choose the licence that suits your release, and the files are sent after payment clears.
+            </p>
+
+            <div className="hero-enter mt-8 flex flex-wrap items-center gap-3" style={{ animationDelay: '280ms' }}>
+              <Link href="/beats" className="btn-red !px-6 !py-3.5 text-[13px]">
+                Browse {stats.beats > 0 ? `${stats.beats} beats` : 'the beats'}
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </Link>
-              <button onClick={() => setVideo(true)} className="btn-ghost !px-7 !py-4 text-sm">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
-                    <path d="M8 5.2v13.6a1 1 0 0 0 1.53.85l10.2-6.8a1 1 0 0 0 0-1.7L9.53 4.35A1 1 0 0 0 8 5.2Z" />
-                  </svg>
-                </span>
-                Watch showreel
-              </button>
+              <Link href="/previews" className="btn-ghost !px-5 !py-3.5 text-[13px]">
+                Listen before you buy
+              </Link>
             </div>
 
-            <div
-              className="animate-fade-up inline-flex items-center gap-2.5 rounded-full border border-brand-500/30 bg-brand-950/50 px-4 py-2 text-[11px] font-bold uppercase tracking-[.18em] text-brand-200 backdrop-blur"
-              style={{ animationDelay: '60ms' }}
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
+            <div className="hero-enter mt-12 flex items-center gap-3 border-t border-white/[.12] pt-5" style={{ animationDelay: '360ms' }}>
+              <span className="grid h-9 w-9 shrink-0 place-items-center border border-white/15 font-serif text-sm text-brand-200">
+                {producer
+                  .split(/\s+/)
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((part) => part[0]?.toUpperCase())
+                  .join('')}
               </span>
-              New drops every Friday · Instant delivery
+              <div className="text-[12px] leading-5">
+                <div className="text-white/85">Produced by {producer}</div>
+                <div className="text-white/40">Beats, recording, mixing &amp; mastering</div>
+              </div>
             </div>
-
-            <dl
-              className="animate-fade-up mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/[.08] pt-7"
-              style={{ animationDelay: '1120ms' }}
-            >
-              {[
-                ['Beats online', String(stats.beats)],
-                ['Artists served', `${stats.artists}+`],
-                ['Licences sold', String(stats.sold)],
-              ].map(([label, value]) => (
-                <div key={label}>
-                  <dt className="text-[10px] font-bold uppercase tracking-[.16em] text-white/35">
-                    {label}
-                  </dt>
-                  <dd className="display mt-1.5 text-[clamp(1.4rem,3vw,2.1rem)] text-white">
-                    {value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
           </div>
 
-          {playerBeat && (
-            <div className="animate-fade-up lg:pl-6" style={{ animationDelay: '640ms' }}>
-              <div className="animate-float">
-                <HeroPlayer beat={playerBeat} tracks={tracks} />
+          {playerBeat && tracks.length > 0 ? (
+            <div className="hero-enter relative lg:ml-auto lg:w-full lg:max-w-[510px]" style={{ animationDelay: '220ms' }}>
+              <div className="mb-2 flex items-center justify-between gap-3 text-[10px] font-medium uppercase tracking-[.13em] text-white/45">
+                <span>Take a listen</span>
+                <span className="text-brand-300">{tracks.length} playable preview{tracks.length === 1 ? '' : 's'}</span>
               </div>
+              <HeroPlayer beat={playerBeat} tracks={tracks} />
+            </div>
+          ) : (
+            <div className="border-y border-white/[.12] py-10 lg:ml-auto lg:w-full lg:max-w-[510px]">
+              <p className="display text-2xl text-white">The first beat is on its way.</p>
+              <p className="mt-2 text-sm text-white/50">Check back soon, or get in touch about a custom track.</p>
+              <Link href="/contact" className="btn-ghost mt-5 !px-4 !py-2.5 text-xs">Contact the studio</Link>
             </div>
           )}
         </div>
-      </div>
 
-      <VideoModal
-        open={video}
-        onClose={() => setVideo(false)}
-        url={showreelUrl}
-        title="Studio showreel"
-      />
+        <div className="hero-enter grid gap-5 border-t border-white/[.10] py-5 text-[12px] text-white/55 sm:grid-cols-3 sm:gap-8" style={{ animationDelay: '420ms' }}>
+          <div className="flex gap-3"><span className="font-serif text-brand-300">01</span><span><strong className="font-medium text-white/85">Hear it first.</strong> Preview the catalogue before you choose.</span></div>
+          <div className="flex gap-3"><span className="font-serif text-brand-300">02</span><span><strong className="font-medium text-white/85">Pick your rights.</strong> Licence details are shown up front.</span></div>
+          <div className="flex gap-3"><span className="font-serif text-brand-300">03</span><span><strong className="font-medium text-white/85">Get straight to work.</strong> Files are delivered by email.</span></div>
+        </div>
+      </div>
     </section>
   );
 }

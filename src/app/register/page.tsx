@@ -12,9 +12,9 @@ export default async function RegisterPage() {
   return (
     <Suspense fallback={null}>
       <AuthShell
-        title="JOIN THE"
-        accent="VAULT"
-        sub="Create a free artist account to buy beats, keep every licence and download link in one place, and message the producer directly."
+        title="Make an"
+        accent="account."
+        sub="Your purchases, download links, studio bookings and messages stay together here. Creating an account is free."
       >
         <RegisterForm />
       </AuthShell>

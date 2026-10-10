@@ -1,148 +1,106 @@
 import Link from 'next/link';
-import HeroCanvas from '@/components/HeroCanvas';
 import Reveal from '@/components/Reveal';
-import { getSettings, getSetting } from '@/lib/db';
-import { siteStats } from '@/lib/queries';
+import { getSettings } from '@/lib/db';
+import { listBeats } from '@/lib/queries';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'About the producer — Project 1' };
-
-const CREDITS = [
-  ['Radio/TV', 'Adverts, idents & sync'],
-  ['Independent artists', 'Singles, EPs & albums'],
-  ['Labels', 'Catalogue & exclusive placements'],
-  ['Content creators', 'YouTube, TikTok & podcast beds'],
-];
+export const metadata = { title: 'About Project 1 — The producer' };
 
 export default function AboutPage() {
-  const s = getSettings();
-  const stats = siteStats();
+  const settings = getSettings();
+  const beats = listBeats();
+  const producer = settings.producer_name || 'the producer';
+  const studio = settings.studio_name || 'Project 1';
+  const address = settings.studio_address?.split('—')[0]?.trim();
+
+  const thingsHere = [
+    {
+      number: '01',
+      title: 'Listen before you decide',
+      copy: `${beats.length} original instrumental${beats.length === 1 ? '' : 's'} in the catalogue, with previews and licence details on each track.`,
+    },
+    {
+      number: '02',
+      title: 'Make the record in the room',
+      copy: 'Book time for vocal recording, mixing, or mastering. The booking page shows the rate and deposit before you confirm.',
+    },
+    {
+      number: '03',
+      title: 'Ask a real question',
+      copy: 'If you have a reference, a release date, or a question about a licence, send a note before you buy.',
+    },
+  ];
 
   return (
     <>
-      {/* banner */}
-      <section className="relative overflow-hidden border-b border-white/[.06] bg-ink-900">
-        <div className="grid-bg mask-fade-b absolute inset-0 opacity-50" />
-        <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand-700/20 blur-[110px]" />
-        <HeroCanvas className="absolute inset-x-0 bottom-0 h-1/2 w-full opacity-70" />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-900 via-ink-900/40 to-transparent" />
-
-        <div className="container-x relative py-24 sm:py-32">
+      <section className="border-b border-white/[.10] bg-ink-900">
+        <div className="container-x py-20 sm:py-28">
           <Reveal>
-            <div className="mb-4 flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[.22em] text-brand-400">
-              <span className="h-[2px] w-7 bg-brand-500" />
-              The producer
+            <div className="mb-4 flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.16em] text-brand-300">
+              <span className="h-px w-7 bg-brand-500" />
+              About {studio}
             </div>
-            <h1 className="display max-w-4xl text-[clamp(2.4rem,7vw,5.4rem)] text-white">
-              {s.producer_name.toUpperCase().split(' ').slice(0, -1).join(' ')}{' '}
-              <span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">
-                {s.producer_name.split(' ').slice(-1)}
-              </span>
+            <h1 className="display max-w-4xl text-[clamp(2.6rem,7vw,5.5rem)] text-white">
+              Made by {producer}.
             </h1>
-            <p className="mt-5 max-w-2xl text-[15px] leading-relaxed text-white/55">
-              {s.tagline}. I build instrumentals for artists who care about how the record
-              actually sounds — mixed, mastered and delivered the same day you buy.
+            <p className="mt-5 max-w-2xl text-[15px] leading-7 text-white/60">
+              {settings.tagline || 'Beats and studio work from Accra.'} A producer-led place to hear original instrumentals, choose a licence, and book time for the rest of the record.
             </p>
+            <div className="mt-12 grid gap-5 border-t border-white/[.11] pt-5 text-sm sm:grid-cols-3 sm:gap-8">
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[.13em] text-white/40">In the catalogue</div>
+                <div className="display mt-1 text-2xl text-white">{beats.length} beats</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[.13em] text-white/40">Studio</div>
+                <div className="mt-2 text-white/80">Recording · mixing · mastering</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-semibold uppercase tracking-[.13em] text-white/40">Location</div>
+                <div className="mt-2 text-white/80">{address || 'By appointment'}</div>
+              </div>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      {/* stats */}
-      <section className="container-x -mt-10">
-        <div className="card grid grid-cols-2 divide-x divide-white/[.06] p-6 lg:grid-cols-4">
-          {[
-            ['Beats published', String(stats.beats)],
-            ['Artists served', String(stats.artists)],
-            ['Licences sold', String(stats.sold)],
-            ['Avg. delivery', 'Instant'],
-          ].map(([k, v]) => (
-            <div key={k} className="px-4 py-2 text-center">
-              <div className="display text-[clamp(1.5rem,3.4vw,2.4rem)] text-white">{v}</div>
-              <div className="mt-1 text-[10px] font-bold uppercase tracking-[.14em] text-white/35">
-                {k}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* story */}
-      <section className="container-x grid gap-12 py-20 lg:grid-cols-[1.2fr_.8fr]">
+      <section className="container-x grid gap-12 py-20 lg:grid-cols-[.9fr_1.1fr] lg:gap-20">
         <Reveal>
-          <div>
-            <h2 className="display text-[clamp(1.7rem,4vw,2.6rem)] text-white">
-              SOUND FIRST. <span className="text-brand-500">ALWAYS.</span>
+          <div className="lg:sticky lg:top-28">
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[.15em] text-brand-300">How it works</p>
+            <h2 className="display text-[clamp(2rem,4vw,3.2rem)] text-white">
+              Hear it.<br />
+              <span className="font-normal italic text-brand-300">Then make it yours.</span>
             </h2>
-            <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-white/55">
-              <p>
-                {getSetting('studio_name')} started as a bedroom setup and a hard drive full of
-                unfinished ideas. Today it is a full production house turning around records for
-                artists across Ghana, Nigeria, the UK and the US.
-              </p>
-              <p>
-                Every instrumental here is written, arranged, mixed and mastered in-house. Nothing is
-                resold from a pack, and nothing goes on the shelf until it sounds like a record on
-                its own — before a single vocal is recorded.
-              </p>
-              <p>
-                Buying a beat here is deliberately boring in the best way: pick it, pay with Mobile
-                Money or a bank transfer, and the files are in your email before you have closed the
-                tab.
-              </p>
+            <p className="mt-5 max-w-md text-sm leading-7 text-white/60">
+              {studio} keeps the practical parts clear: listen to a beat, read what each licence includes, and get the files once payment clears. For studio work, choose a service and a time that suits you.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/beats" className="btn-red">Browse the beats</Link>
+              <Link href="/studio" className="btn-ghost">Book studio time</Link>
             </div>
           </div>
         </Reveal>
 
-        <Reveal delay={100}>
-          <div className="card p-6">
-            <h3 className="display mb-5 text-base text-white">WORKING WITH</h3>
-            <ul className="space-y-4">
-              {CREDITS.map(([title, sub]) => (
-                <li key={title} className="flex gap-3">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
-                  <div>
-                    <div className="text-[13px] font-bold text-white">{title}</div>
-                    <div className="text-[12px] text-white/40">{sub}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-7 border-t border-white/[.07] pt-5">
-              <div className="text-[10px] font-bold uppercase tracking-[.16em] text-white/35">
-                Enquiries
-              </div>
-              <a
-                href={`mailto:${s.support_email}`}
-                className="mt-1 block text-[14px] font-bold text-brand-300 hover:underline"
-              >
-                {s.support_email}
-              </a>
-            </div>
+        <div className="border-t border-white/[.12]">
+          {thingsHere.map((item, index) => (
+            <Reveal key={item.number} delay={index * 60}>
+              <article className="grid gap-3 border-b border-white/[.10] py-6 sm:grid-cols-[48px_1fr] sm:gap-5">
+                <span className="font-serif text-sm italic text-brand-300">{item.number}</span>
+                <div>
+                  <h3 className="display text-xl text-white">{item.title}</h3>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-white/55">{item.copy}</p>
+                </div>
+              </article>
+            </Reveal>
+          ))}
+          <div className="pt-6">
+            <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-white/40">A direct line</div>
+            <a href={`mailto:${settings.support_email}`} className="mt-2 inline-block text-sm text-brand-200 transition-colors hover:text-white">
+              {settings.support_email}
+            </a>
           </div>
-        </Reveal>
-      </section>
-
-      {/* cta */}
-      <section className="container-x pb-8">
-        <Reveal>
-          <div className="relative overflow-hidden rounded-[30px] border border-brand-500/20 bg-gradient-to-br from-brand-950 to-ink-900 px-6 py-14 text-center">
-            <div className="pointer-events-none absolute inset-0 grid-bg opacity-25" />
-            <div className="relative">
-              <h2 className="display mx-auto max-w-2xl text-[clamp(1.8rem,4.6vw,3rem)] text-white">
-                Ready to find your next single?
-              </h2>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Link href="/beats" className="btn-red !px-8 !py-4 text-sm">
-                  Browse beats
-                </Link>
-                <Link href="/contact" className="btn-ghost !px-8 !py-4 text-sm">
-                  Commission a custom beat
-                </Link>
-              </div>
-            </div>
-          </div>
-        </Reveal>
+        </div>
       </section>
     </>
   );

@@ -28,7 +28,7 @@ export default async function DashboardStudioPage() {
               Studio
             </div>
             <h1 className="display text-[clamp(1.9rem,4.6vw,3rem)] text-white">
-              MY <span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">SESSIONS</span>
+              Your <span className="font-normal italic text-brand-300">sessions.</span>
             </h1>
             <p className="mt-3 text-sm text-white/45">
               {upcoming.length

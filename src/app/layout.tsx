@@ -12,9 +12,9 @@ import CartDrawer from '@/components/CartDrawer';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Project 1 — Premium beats, delivered instantly',
+  title: 'Project 1 — Beats by Nathaniel Sasuosei',
   description:
-    'Buy Afrobeat, Drill, Amapiano and Trap instrumentals. Pay with Mobile Money or bank transfer and get your files by email instantly.',
+    'Listen to original beats, choose a licence, and book recording, mixing or mastering with Project 1.',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

@@ -16,7 +16,7 @@ export default async function AccountPage() {
           Settings
         </div>
         <h1 className="display text-[clamp(1.9rem,4.6vw,3rem)] text-white">
-          AC<span className="bg-gradient-to-r from-brand-400 to-brand-700 bg-clip-text text-transparent">COUNT</span>
+          Account <span className="font-normal italic text-brand-300">details.</span>
         </h1>
         <p className="mt-3 text-sm text-white/45">
           Update the details we deliver your beats to.

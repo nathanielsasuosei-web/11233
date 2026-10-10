@@ -7,76 +7,67 @@ export default function Footer({
   settings: Record<string, string>;
 }) {
   const studio = settings.studio_name || 'PROJECT 1';
+  const producer = settings.producer_name || 'Independent producer';
+
   return (
-    <footer className="relative mt-24 overflow-hidden border-t border-white/[.07] bg-ink-900">
-      <div className="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[900px] -translate-x-1/2 rounded-full bg-brand-600/10 blur-[100px]" />
-      <div className="container-x relative py-16">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+    <footer className="mt-20 border-t border-white/[.10] bg-ink-900">
+      <div className="container-x py-12 sm:py-16">
+        <div className="grid gap-10 md:grid-cols-[1.35fr_.8fr_.8fr_1.1fr]">
           <div>
-            <div className="display text-2xl tracking-tight">{studio}</div>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/45">
-              {settings.tagline}. Built for artists who want radio-ready sound without the
-              label budget.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {['Afrobeats', 'Drill', 'Amapiano', 'Trap'].map((g) => (
-                <Link key={g} href={`/beats?genre=${g}`} className="chip hover:border-brand-500/40 hover:text-white">
-                  {g}
-                </Link>
-              ))}
-            </div>
-            <div className="mt-6">
-              <div className="text-[11px] font-bold uppercase tracking-[.16em] text-white/35">
-                New beats, every Friday
+            <div className="flex items-center gap-3">
+              <span className="grid h-9 w-9 place-items-center border border-brand-500/45 font-serif text-sm text-white">
+                P<span className="text-brand-300">1</span>
+              </span>
+              <div>
+                <div className="text-[12px] font-semibold uppercase tracking-[.16em] text-white">{studio}</div>
+                <div className="mt-1 text-[10px] text-white/40">{producer}</div>
               </div>
+            </div>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/55">
+              {settings.tagline || 'Independent beats and studio work.'}
+            </p>
+            <div className="mt-6">
+              <div className="text-[11px] font-medium text-white/70">A note when new work lands</div>
               <SubscribeForm />
             </div>
           </div>
 
           <div>
-            <div className="mb-4 text-[11px] font-bold uppercase tracking-[.18em] text-white/35">
-              Store
-            </div>
-            <ul className="space-y-2.5 text-sm text-white/55">
-              <li><Link className="hover:text-brand-300" href="/beats">All beats</Link></li>
-              <li><Link className="hover:text-brand-300" href="/previews">Beat previews</Link></li>
-              <li><Link className="hover:text-brand-300" href="/studio">Book studio time</Link></li>
-              <li><Link className="hover:text-brand-300" href="/videos">Videos</Link></li>
-              <li><Link className="hover:text-brand-300" href="/licensing">Licensing</Link></li>
-              <li><Link className="hover:text-brand-300" href="/checkout">Checkout</Link></li>
+            <div className="mb-4 text-[10px] font-semibold uppercase tracking-[.15em] text-white/45">Listen</div>
+            <ul className="space-y-2.5 text-sm text-white/60">
+              <li><Link className="transition-colors hover:text-brand-200" href="/beats">All beats</Link></li>
+              <li><Link className="transition-colors hover:text-brand-200" href="/previews">Preview queue</Link></li>
+              <li><Link className="transition-colors hover:text-brand-200" href="/licensing">Licences</Link></li>
+              <li><Link className="transition-colors hover:text-brand-200" href="/videos">Studio videos</Link></li>
             </ul>
           </div>
 
           <div>
-            <div className="mb-4 text-[11px] font-bold uppercase tracking-[.18em] text-white/35">
-              Account
-            </div>
-            <ul className="space-y-2.5 text-sm text-white/55">
-              <li><Link className="hover:text-brand-300" href="/register">Create account</Link></li>
-              <li><Link className="hover:text-brand-300" href="/login">Log in</Link></li>
-              <li><Link className="hover:text-brand-300" href="/dashboard">My library</Link></li>
-              <li><Link className="hover:text-brand-300" href="/admin">Producer login</Link></li>
+            <div className="mb-4 text-[10px] font-semibold uppercase tracking-[.15em] text-white/45">Studio</div>
+            <ul className="space-y-2.5 text-sm text-white/60">
+              <li><Link className="transition-colors hover:text-brand-200" href="/studio">Book a session</Link></li>
+              <li><Link className="transition-colors hover:text-brand-200" href="/about">About the producer</Link></li>
+              <li><Link className="transition-colors hover:text-brand-200" href="/contact">Get in touch</Link></li>
+              <li><Link className="transition-colors hover:text-brand-200" href="/dashboard">My library</Link></li>
             </ul>
           </div>
 
           <div>
-            <div className="mb-4 text-[11px] font-bold uppercase tracking-[.18em] text-white/35">
-              Get in touch
-            </div>
-            <ul className="space-y-2.5 text-sm text-white/55">
-              <li>{settings.support_email}</li>
-              <li>Mobile Money: {settings.momo_number}</li>
-              <li>{settings.bank_name} · {settings.bank_account_number}</li>
-            </ul>
-            <Link href="/contact" className="btn-red mt-5 !px-5 !py-2.5 text-xs">
-              Send a message
-            </Link>
+            <div className="mb-4 text-[10px] font-semibold uppercase tracking-[.15em] text-white/45">Contact</div>
+            <p className="max-w-xs text-sm leading-relaxed text-white/55">
+              Questions about a licence, session, or order? Send a message and include the track or order reference if you have one.
+            </p>
+            {settings.support_email && (
+              <a href={`mailto:${settings.support_email}`} className="mt-3 inline-block break-all text-sm text-brand-200 transition-colors hover:text-white">
+                {settings.support_email}
+              </a>
+            )}
           </div>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-white/[.06] pt-7 text-[11px] uppercase tracking-[.16em] text-white/25 sm:flex-row">
+        <div className="mt-12 flex flex-col gap-3 border-t border-white/[.09] pt-5 text-[11px] text-white/40 sm:flex-row sm:items-center sm:justify-between">
           <span>© {new Date().getFullYear()} {studio}. All rights reserved.</span>
-          <span>Instant delivery · Mobile Money &amp; Bank transfer</span>
+          <span>Listen first · Choose your licence · Get to work</span>
         </div>
       </div>
     </footer>

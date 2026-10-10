@@ -12,9 +12,9 @@ export default async function LoginPage() {
   return (
     <Suspense fallback={null}>
       <AuthShell
-        title="WELCOME"
-        accent="BACK"
-        sub="Log in to reach your library — every beat you have bought, with fresh download links and the messages you have sent."
+        title="Good to see you,"
+        accent="again."
+        sub="Sign in to find your purchases, download files, or pick up a conversation with the producer."
       >
         <LoginForm />
       </AuthShell>
