@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { all, get, getSetting, run } from '@/lib/db';
 import { readSession } from '@/lib/auth';
 import { initializeTransaction, paystackMode } from '@/lib/paystack';
+import { absoluteUrl } from '@/lib/fulfill';
 import { LICENSES, randomToken, reference as makeRef, type LicenseId } from '@/lib/utils';
+import { notifyProducerOrder } from '@/lib/whatsapp';
 
 const Schema = z.object({
   items: z
@@ -91,8 +93,8 @@ export async function POST(req: Request) {
   }
 
   // remember the public origin so emailed links work even from webhooks
+  const origin = absoluteUrl(req, '');
   try {
-    const origin = new URL(req.url).origin;
     if (!getSetting('site_url') && !origin.includes('localhost')) {
       run(`INSERT INTO settings (key, value) VALUES ('site_url', ?)
            ON CONFLICT(key) DO UPDATE SET value = excluded.value`, [origin]);
@@ -101,13 +103,16 @@ export async function POST(req: Request) {
     /* ignore */
   }
 
+  // Deliver the order message to the producer's website inbox & WhatsApp immediately
+  const wa = await notifyProducerOrder(orderId, (p) => absoluteUrl(req, p), { event: 'created' });
+
   try {
     const init = await initializeTransaction({
       email: session.email,
       amount: total,
       currency,
       reference: ref,
-      callbackUrl: `${new URL(req.url).origin}/checkout/verify?reference=${ref}`,
+      callbackUrl: absoluteUrl(req, `/checkout/verify?reference=${ref}`),
       metadata: { order_id: orderId, user_id: userId, method },
       channels: method === 'mobile_money' ? ['mobile_money'] : method === 'bank' ? ['bank'] : ['card'],
     });
@@ -116,6 +121,7 @@ export async function POST(req: Request) {
       ok: true,
       reference: ref,
       authorization_url: init.authorization_url,
+      whatsapp_url: wa?.whatsappUrl || '',
       demo: paystackMode() === 'demo',
     });
   } catch (err: any) {

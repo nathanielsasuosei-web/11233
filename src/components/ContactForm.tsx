@@ -16,24 +16,32 @@ const SUBJECTS = [
 export default function ContactForm({
   name,
   email,
+  phone = '',
   initialSubject,
 }: {
   name: string;
   email: string;
+  phone?: string;
   initialSubject?: string;
 }) {
   const [form, setForm] = useState({
     name,
     email,
+    phone,
     subject: initialSubject && SUBJECTS.includes(initialSubject) ? initialSubject : SUBJECTS[0],
     body: '',
   });
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState('');
   const toast = useToast();
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
+  async function sendMessage(openWhatsApp = false) {
+    if (!form.name.trim() || !form.email.trim() || form.body.trim().length < 10) {
+      toast('Please fill in your name, email and message (at least 10 characters)', 'err');
+      return;
+    }
+    const waWin = openWhatsApp ? window.open('about:blank', '_blank') : null;
     setSending(true);
     try {
       const res = await fetch('/api/contact', {
@@ -43,13 +51,29 @@ export default function ContactForm({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Could not send');
+      setWhatsappUrl(json.whatsapp_url || '');
+      if (openWhatsApp && json.whatsapp_url) {
+        if (waWin) {
+          waWin.location.href = json.whatsapp_url;
+        } else {
+          window.open(json.whatsapp_url, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        waWin?.close();
+      }
       setDone(true);
-      toast('Message sent — I usually reply within 24 hours');
+      toast('Message delivered to studio inbox & WhatsApp');
     } catch (err: any) {
+      waWin?.close();
       toast(err.message || 'Could not send message', 'err');
     } finally {
       setSending(false);
     }
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    await sendMessage(false);
   }
 
   if (done) {
@@ -60,12 +84,24 @@ export default function ContactForm({
         </div>
         <h3 className="display text-xl text-white">Message received</h3>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-white/45">
-          Thanks {form.name.split(' ')[0]} — your message is in the studio inbox. You&apos;ll get a
-          reply by email, usually within 24 hours.
+          Thanks {form.name.split(' ')[0]} — your message is in the studio inbox on the website.
         </p>
-        <button onClick={() => setDone(false)} className="btn-ghost mt-6 !px-6 text-xs">
-          Send another message
-        </button>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {whatsappUrl && (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-xs font-extrabold uppercase tracking-[.1em] text-black transition hover:bg-emerald-400"
+            >
+              <span>💬</span>
+              Send straight to Producer&apos;s WhatsApp
+            </a>
+          )}
+          <button onClick={() => setDone(false)} className="btn-ghost !px-6 text-xs">
+            Send another message
+          </button>
+        </div>
       </div>
     );
   }
@@ -92,6 +128,16 @@ export default function ContactForm({
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="input"
             placeholder="you@example.com"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <label className="label">Phone / WhatsApp number</label>
+          <input
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            className="input"
+            placeholder="055 000 0000"
+            inputMode="tel"
           />
         </div>
       </div>
@@ -123,11 +169,22 @@ export default function ContactForm({
         />
       </div>
 
-      <button type="submit" disabled={sending} className="btn-red w-full !py-4 text-sm">
-        {sending ? 'Sending…' : 'Send message'}
-      </button>
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        <button type="submit" disabled={sending} className="btn-red w-full !py-4 text-sm">
+          {sending ? 'Sending…' : 'Send on Website'}
+        </button>
+        <button
+          type="button"
+          disabled={sending}
+          onClick={() => sendMessage(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-5 py-4 text-xs font-extrabold uppercase tracking-[.12em] text-emerald-200 transition hover:border-emerald-400/60 hover:bg-emerald-500/25 hover:text-white disabled:opacity-40"
+        >
+          <span>💬</span>
+          Send &amp; Open WhatsApp
+        </button>
+      </div>
       <p className="text-center text-[11px] text-white/30">
-        Prefer WhatsApp or a call? Details are on the left.
+        Goes straight to the producer&apos;s website inbox and WhatsApp.
       </p>
     </form>
   );

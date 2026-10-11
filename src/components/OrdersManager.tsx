@@ -3,14 +3,16 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
-import { useMoney } from '@/components/SettingsProvider';
-import { timeAgo } from '@/lib/utils';
+import { useMoney, useSettings } from '@/components/SettingsProvider';
+import { buildWhatsAppUrl, timeAgo } from '@/lib/utils';
 
 export type AdminOrder = {
   id: number;
   reference: string;
   name: string;
   email: string;
+  phone?: string;
+  pay_phone?: string;
   total: number;
   status: string;
   method: string;
@@ -35,6 +37,33 @@ export default function OrdersManager({ orders }: { orders: AdminOrder[] }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const money = useMoney();
+  const { settings } = useSettings();
+
+  const countryCode = settings.whatsapp_country_code || '233';
+  const producerPhone =
+    settings.whatsapp_number || settings.studio_phone || settings.momo_number || '055 000 0000';
+
+  function buyerWaHref(o: AdminOrder) {
+    const phone = o.phone || o.pay_phone || '';
+    if (!phone) return '';
+    const itemSummary = o.items.map((i) => `${i.beat_title} (${i.license})`).join(', ');
+    const text = `Hi ${(o.name || 'there').split(' ')[0]}, this is ${settings.producer_name || 'the producer'} (${settings.studio_name || 'Project 1'}) regarding your beat order ${o.reference}: ${itemSummary} (${money(o.total)}).`;
+    return buildWhatsAppUrl(phone, text, countryCode);
+  }
+
+  function producerWaHref(o: AdminOrder) {
+    const itemLines = o.items.map((i) => `• ${i.beat_title} — ${i.license} (${money(i.price)})`);
+    const text = [
+      `🎧 *BEAT ORDER ${o.reference}*`,
+      `*Customer:* ${o.name} (${o.email})`,
+      ...(o.phone || o.pay_phone ? [`*Phone:* ${o.phone || o.pay_phone}`] : []),
+      `*Status:* ${o.status.toUpperCase()}`,
+      `*Items:*`,
+      ...itemLines,
+      `*Total:* ${money(o.total)}`,
+    ].join('\n');
+    return buildWhatsAppUrl(producerPhone, text, countryCode);
+  }
 
   const shown = orders.filter((o) => (filter === 'all' ? true : o.status === filter));
 
@@ -125,7 +154,9 @@ export default function OrdersManager({ orders }: { orders: AdminOrder[] }) {
                 </div>
                 <div className="mt-1.5 truncate text-[14px] font-bold text-white">{o.name}</div>
                 <div className="truncate text-[11px] text-white/35">
-                  {o.email} · {o.method || '—'} · {timeAgo(o.created_at)}
+                  {o.email}
+                  {o.phone || o.pay_phone ? ` · ${o.phone || o.pay_phone}` : ''} · {o.method || '—'} ·{' '}
+                  {timeAgo(o.created_at)}
                 </div>
               </div>
 
@@ -157,6 +188,28 @@ export default function OrdersManager({ orders }: { orders: AdminOrder[] }) {
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
+                  {buyerWaHref(o) && (
+                    <a
+                      href={buyerWaHref(o)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-4 py-2 text-[11px] font-bold text-emerald-200 transition hover:bg-emerald-500/25 hover:text-white"
+                    >
+                      <span>💬</span>
+                      WhatsApp customer
+                    </a>
+                  )}
+                  {producerWaHref(o) && (
+                    <a
+                      href={producerWaHref(o)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/[.08] px-4 py-2 text-[11px] font-bold text-emerald-300 transition hover:bg-emerald-500/20"
+                    >
+                      <span>📲</span>
+                      Send to my WhatsApp
+                    </a>
+                  )}
                   <button
                     onClick={() => act(o, 'resend')}
                     disabled={busy === o.id}

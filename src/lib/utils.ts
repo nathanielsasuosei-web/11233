@@ -121,3 +121,31 @@ export function youtubeId(url: string) {
   );
   return m ? m[1] : '';
 }
+
+/**
+ * Normalizes a local or international phone string (e.g. "055 000 0000" or
+ * "MTN Mobile Money · 0551234567" or "+233 55 123 4567") into E.164 digits
+ * suitable for `https://wa.me/<digits>`.
+ */
+export function normalizeWhatsAppPhone(raw: string, defaultCountryCode = '233') {
+  if (!raw) return '';
+  const segment = raw.includes('·') ? raw.split('·').pop() || raw : raw;
+  let digits = segment.replace(/\D/g, '');
+  if (!digits) return '';
+  const cc = (defaultCountryCode || '233').replace(/\D/g, '') || '233';
+  if (digits.startsWith('00')) {
+    digits = digits.slice(2);
+  } else if (digits.startsWith('0') && digits.length === 10) {
+    digits = cc + digits.slice(1);
+  } else if (digits.length === 9) {
+    digits = cc + digits;
+  }
+  return digits;
+}
+
+export function buildWhatsAppUrl(phone: string, text: string, defaultCountryCode = '233') {
+  const digits = normalizeWhatsAppPhone(phone, defaultCountryCode);
+  if (!digits) return '';
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+}
+

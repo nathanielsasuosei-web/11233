@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSettings } from '@/components/SettingsProvider';
 import { useToast } from '@/components/Toast';
 
 const CHANNELS = [
@@ -27,11 +28,14 @@ export default function SimulateClient({
   );
   const [busy, setBusy] = useState(false);
   const toast = useToast();
+  const { settings } = useSettings();
 
   const money = (n: number) =>
     currencySymbol + (n / 100).toLocaleString('en-GB', { minimumFractionDigits: 2 });
 
   async function confirm() {
+    const autoWa = settings.whatsapp_auto_open !== '0' && settings.whatsapp_enabled !== '0';
+    const waWin = autoWa ? window.open('about:blank', '_blank') : null;
     setBusy(true);
     try {
       const res = await fetch('/api/checkout/simulate', {
@@ -41,8 +45,18 @@ export default function SimulateClient({
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || 'Payment failed');
+      if (autoWa && json.whatsapp_url) {
+        if (waWin) {
+          waWin.location.href = json.whatsapp_url;
+        } else {
+          window.open(json.whatsapp_url, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        waWin?.close();
+      }
       window.location.href = `/checkout/success?reference=${reference}`;
     } catch (e: any) {
+      waWin?.close();
       toast(e.message || 'Payment failed', 'err');
       setBusy(false);
     }

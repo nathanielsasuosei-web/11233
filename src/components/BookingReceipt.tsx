@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMoney } from './SettingsProvider';
+import { buildWhatsAppUrl } from '@/lib/utils';
+import { useMoney, useSettings } from './SettingsProvider';
 import { useToast } from './Toast';
 
 export type BookingView = {
@@ -66,11 +67,30 @@ export default function BookingReceipt({
   compact?: boolean;
 }) {
   const money = useMoney();
+  const { settings } = useSettings();
   const toast = useToast();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const canPay = booking.status === 'pending';
   const paid = booking.status === 'deposit_paid' || booking.status === 'confirmed';
+
+  const producerPhone =
+    settings.whatsapp_number || settings.studio_phone || settings.momo_number || '055 000 0000';
+  const waText = [
+    `🎙️ *STUDIO BOOKING — ${settings.studio_name || 'PROJECT 1'}*`,
+    `*Ref:* ${booking.reference}`,
+    `*Session:* ${booking.hours}h ${booking.service_title}`,
+    `*When:* ${booking.session_date} · ${booking.start_time}–${booking.end_time}`,
+    `*Artist:* ${booking.name}${booking.phone ? ` (${booking.phone})` : ''}`,
+    `*Deposit:* ${money(booking.deposit)} (${paid ? 'Paid ✅' : 'Pending ⏳'})`,
+    `*Balance at Studio:* ${money(booking.balance)}`,
+    ...(booking.notes ? [`*Notes:* ${booking.notes}`] : []),
+  ].join('\n');
+  const whatsappHref = buildWhatsAppUrl(
+    producerPhone,
+    waText,
+    settings.whatsapp_country_code || '233',
+  );
 
   async function pay() {
     setBusy(true);
@@ -213,6 +233,17 @@ export default function BookingReceipt({
         >
           Add to calendar
         </a>
+        {whatsappHref && (
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-4 py-2 text-[11px] font-bold text-emerald-200 transition hover:bg-emerald-500/25 hover:text-white"
+          >
+            <span>💬</span>
+            WhatsApp producer
+          </a>
+        )}
         <Link
           href="/contact"
           className="ml-auto text-[11px] font-bold uppercase tracking-[.14em] text-white/35 transition hover:text-brand-300"

@@ -3,7 +3,8 @@
 import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMoney } from './SettingsProvider';
+import { buildWhatsAppUrl } from '@/lib/utils';
+import { useMoney, useSettings } from './SettingsProvider';
 import { useToast } from './Toast';
 
 export type AdminBooking = {
@@ -59,8 +60,38 @@ export default function BookingsManager({ bookings }: { bookings: AdminBooking[]
   const [open, setOpen] = useState<string | null>(null);
   const toast = useToast();
   const money = useMoney();
+  const { settings } = useSettings();
   const router = useRouter();
   const [, startTransition] = useTransition();
+
+  const countryCode = settings.whatsapp_country_code || '233';
+  const producerPhone =
+    settings.whatsapp_number || settings.studio_phone || settings.momo_number || '055 000 0000';
+
+  function artistWaHref(b: AdminBooking) {
+    if (!b.phone) return '';
+    const paid = b.status === 'deposit_paid' || b.status === 'confirmed';
+    const text = [
+      `Hi ${b.name.split(' ')[0]}, this is ${settings.producer_name || 'the studio'} (${settings.studio_name || 'Project 1'}).`,
+      paid
+        ? `Your ${b.hours}h ${b.service_title} session on ${b.session_date} (${b.start_time}–${b.end_time}) is locked (Ref ${b.reference}). Balance due at the studio: ${money(b.balance)}.`
+        : `We received your booking hold for ${b.hours}h ${b.service_title} on ${b.session_date} (${b.start_time}–${b.end_time}) — Ref ${b.reference}. Deposit to lock slot: ${money(b.deposit)}.`,
+    ].join('\n\n');
+    return buildWhatsAppUrl(b.phone, text, countryCode);
+  }
+
+  function producerWaHref(b: AdminBooking) {
+    const text = [
+      `🎙️ *BOOKING ${b.reference}*`,
+      `*Session:* ${b.hours}h ${b.service_title}`,
+      `*Date & Time:* ${b.session_date} · ${b.start_time}–${b.end_time}`,
+      `*Artist:* ${b.name}${b.phone ? ` (${b.phone})` : ''}`,
+      `*Deposit:* ${money(b.deposit)} · *Balance:* ${money(b.balance)}`,
+      `*Status:* ${b.status.replace('_', ' ')}`,
+      ...(b.notes ? [`*Notes:* ${b.notes}`] : []),
+    ].join('\n');
+    return buildWhatsAppUrl(producerPhone, text, countryCode);
+  }
 
   const shown = useMemo(() => {
     const list = bookings.filter((b) => {
@@ -258,6 +289,18 @@ export default function BookingsManager({ bookings }: { bookings: AdminBooking[]
                         {chip(b.status)}
 
                         <div className="flex shrink-0 items-center gap-2">
+                          {b.phone && artistWaHref(b) && (
+                            <a
+                              href={artistWaHref(b)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-bold text-emerald-200 transition hover:bg-emerald-500/25 hover:text-white"
+                              title={`WhatsApp ${b.name}`}
+                            >
+                              <span>💬</span>
+                              <span className="hidden sm:inline">WhatsApp</span>
+                            </a>
+                          )}
                           {b.status === 'pending' && (
                             <button
                               onClick={() => act(b, 'mark-paid')}
@@ -323,6 +366,28 @@ export default function BookingsManager({ bookings }: { bookings: AdminBooking[]
                                 ))}
                               </div>
                               <div className="mt-3 flex flex-wrap gap-2 lg:flex-col lg:items-stretch">
+                                {b.phone && artistWaHref(b) && (
+                                  <a
+                                    href={artistWaHref(b)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-1.5 text-[11px] font-bold text-emerald-200 transition hover:bg-emerald-500/25 hover:text-white"
+                                  >
+                                    <span>💬</span>
+                                    WhatsApp artist
+                                  </a>
+                                )}
+                                {producerWaHref(b) && (
+                                  <a
+                                    href={producerWaHref(b)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/[.08] px-3.5 py-1.5 text-[11px] font-bold text-emerald-300 transition hover:bg-emerald-500/20"
+                                  >
+                                    <span>📲</span>
+                                    Send to my WhatsApp
+                                  </a>
+                                )}
                                 <Link
                                   href={`/studio/booking/${b.reference}`}
                                   target="_blank"

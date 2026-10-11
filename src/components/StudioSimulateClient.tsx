@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMoney } from './SettingsProvider';
+import { useMoney, useSettings } from './SettingsProvider';
 import { useToast } from './Toast';
 
 const CHANNELS = [
@@ -30,10 +30,13 @@ export default function StudioSimulateClient({
   const router = useRouter();
   const toast = useToast();
   const money = useMoney();
+  const { settings } = useSettings();
 
   const amount = money(booking.deposit || 0);
 
-  async function confirm() {
+  async function confirm(openWhatsApp = false) {
+    const autoWa = openWhatsApp || (settings.whatsapp_auto_open !== '0' && settings.whatsapp_enabled !== '0');
+    const waWin = autoWa ? window.open('about:blank', '_blank') : null;
     setBusy(true);
     try {
       const res = await fetch('/api/studio/simulate', {
@@ -43,9 +46,19 @@ export default function StudioSimulateClient({
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) throw new Error(json.error || 'Payment failed');
-      toast('Deposit confirmed');
+      if (autoWa && json.whatsapp_url) {
+        if (waWin) {
+          waWin.location.href = json.whatsapp_url;
+        } else {
+          window.open(json.whatsapp_url, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        waWin?.close();
+      }
+      toast('Deposit confirmed — producer notified on website & WhatsApp');
       router.refresh();
     } catch (err: any) {
+      waWin?.close();
       toast(err.message || 'Payment failed', 'err');
     } finally {
       setBusy(false);
@@ -84,11 +97,11 @@ export default function StudioSimulateClient({
           ))}
         </div>
 
-        <button onClick={confirm} disabled={busy} className="btn-red mt-3 w-full !py-4 text-sm">
+        <button onClick={() => confirm(false)} disabled={busy} className="btn-red mt-3 w-full !py-4 text-sm">
           {busy ? 'Approving…' : `Approve ${amount}`}
         </button>
         <p className="text-center text-[10px] uppercase tracking-[.14em] text-white/25">
-          No Paystack keys are set, so this is a simulated approval.
+          No Paystack keys are set, so this is a simulated approval · notifies producer on website &amp; WhatsApp.
         </p>
       </div>
     </div>

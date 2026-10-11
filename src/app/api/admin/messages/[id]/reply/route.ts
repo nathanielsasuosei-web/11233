@@ -7,13 +7,22 @@ export async function POST(req: Request, ctx: { params: { id: string } }) {
   if (!(await requireAdmin())) return NextResponse.json({ error: 'Not authorised' }, { status: 401 });
 
   const id = Number(ctx.params.id);
-  const { reply } = (await req.json().catch(() => ({}))) as { reply?: string };
-  if (!id || !reply || reply.trim().length < 2) {
-    return NextResponse.json({ error: 'Write a reply first' }, { status: 400 });
+  const { reply, action } = (await req.json().catch(() => ({}))) as { reply?: string; action?: string };
+  if (!id) {
+    return NextResponse.json({ error: 'Invalid message ID' }, { status: 400 });
   }
 
   const msg = get<any>('SELECT * FROM messages WHERE id = ?', [id]);
   if (!msg) return NextResponse.json({ error: 'Message not found' }, { status: 404 });
+
+  if (action === 'mark-read') {
+    run("UPDATE messages SET status='read' WHERE id=?", [id]);
+    return NextResponse.json({ ok: true });
+  }
+
+  if (!reply || reply.trim().length < 2) {
+    return NextResponse.json({ error: 'Write a reply first' }, { status: 400 });
+  }
 
   run("UPDATE messages SET status='read', admin_reply=?, replied_at=? WHERE id=?", [
     reply,

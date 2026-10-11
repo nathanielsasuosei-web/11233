@@ -130,16 +130,20 @@ function migrate(d: DatabaseSync) {
   );
 
   CREATE TABLE IF NOT EXISTS messages (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    name       TEXT NOT NULL,
-    email      TEXT NOT NULL,
-    subject    TEXT NOT NULL,
-    body       TEXT NOT NULL,
-    user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    status     TEXT NOT NULL DEFAULT 'unread',
-    admin_reply TEXT DEFAULT '',
-    replied_at TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT NOT NULL,
+    email        TEXT NOT NULL,
+    phone        TEXT DEFAULT '',
+    subject      TEXT NOT NULL,
+    body         TEXT NOT NULL,
+    kind         TEXT NOT NULL DEFAULT 'enquiry',
+    reference    TEXT DEFAULT '',
+    whatsapp_url TEXT DEFAULT '',
+    user_id      INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    status       TEXT NOT NULL DEFAULT 'unread',
+    admin_reply  TEXT DEFAULT '',
+    replied_at   TEXT,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
   CREATE TABLE IF NOT EXISTS email_log (
@@ -151,6 +155,19 @@ function migrate(d: DatabaseSync) {
     status     TEXT NOT NULL DEFAULT 'queued',
     error      TEXT DEFAULT '',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS whatsapp_log (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    to_phone     TEXT NOT NULL,
+    message      TEXT NOT NULL,
+    whatsapp_url TEXT NOT NULL DEFAULT '',
+    kind         TEXT NOT NULL DEFAULT 'general',
+    reference    TEXT DEFAULT '',
+    status       TEXT NOT NULL DEFAULT 'ready',
+    provider     TEXT DEFAULT 'wa.me',
+    error        TEXT DEFAULT '',
+    created_at   TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
   CREATE TABLE IF NOT EXISTS settings (
@@ -217,6 +234,19 @@ function migrate(d: DatabaseSync) {
   CREATE INDEX IF NOT EXISTS idx_bookings_date ON bookings(session_date, status);
   CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id);
   `);
+
+  for (const col of [
+    "ALTER TABLE messages ADD COLUMN phone TEXT DEFAULT ''",
+    "ALTER TABLE messages ADD COLUMN kind TEXT NOT NULL DEFAULT 'enquiry'",
+    "ALTER TABLE messages ADD COLUMN reference TEXT DEFAULT ''",
+    "ALTER TABLE messages ADD COLUMN whatsapp_url TEXT DEFAULT ''",
+  ]) {
+    try {
+      d.exec(col);
+    } catch {
+      /* column already exists */
+    }
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -416,21 +446,55 @@ function seedIfEmpty(d: DatabaseSync) {
   const msgCount = d.prepare('SELECT COUNT(*) c FROM messages').get() as { c: number };
   if (Number(msgCount?.c || 0) === 0) {
     d.prepare(
-      'INSERT INTO messages (name,email,subject,body,status) VALUES (?,?,?,?,?)',
+      'INSERT INTO messages (name,email,phone,subject,body,kind,reference,status) VALUES (?,?,?,?,?,?,?,?)',
     ).run(
       'Kwame Osei',
       'kwame@streetlabel.gh',
+      '0559876543',
       'Custom beat for an album',
       'Hey — I need 5 exclusive beats for an upcoming album. Budget is GH₵5,000 total. Can we talk this week?',
+      'enquiry',
+      '',
       'unread',
     );
     d.prepare(
-      'INSERT INTO messages (name,email,subject,body,status) VALUES (?,?,?,?,?)',
+      'INSERT INTO messages (name,email,phone,subject,body,kind,reference,status) VALUES (?,?,?,?,?,?,?,?)',
     ).run(
       'Zainab Musah',
       'zainab.m@gmail.com',
+      '0241122334',
       'Stem request',
       'I bought Midnight In Accra last week, can I get the stems for mixing?',
+      'enquiry',
+      '',
+      'unread',
+    );
+    const in1h = new Date(Date.now() + 86400000);
+    const day = in1h.toISOString().slice(0, 10);
+    d.prepare(
+      'INSERT INTO messages (name,email,phone,subject,body,kind,reference,user_id,status) VALUES (?,?,?,?,?,?,?,?,?)',
+    ).run(
+      'Ama Serwaa',
+      'artist@example.com',
+      '0551234567',
+      `🎙️ Studio Booking: Mixing (${day} 14:00) — BK-DEMO-0001`,
+      `🎙️ *STUDIO BOOKING ORDER — PROJECT 1*\n*Status:* Deposit Paid ✅\n*Reference:* BK-DEMO-0001\n*Service:* Mixing (3 hrs)\n*Date & Time:* ${day} · 14:00–17:00\n*Artist:* Ama Serwaa\n*Phone:* 0551234567\n*Email:* artist@example.com\n*Total:* GH₵450.00\n*Deposit (50%):* GH₵225.00\n*Balance at Studio:* GH₵225.00\n*Notes:* Six tracks to balance — vocals are already tuned.`,
+      'booking',
+      'BK-DEMO-0001',
+      demoUserId || null,
+      'unread',
+    );
+    d.prepare(
+      'INSERT INTO messages (name,email,phone,subject,body,kind,reference,user_id,status) VALUES (?,?,?,?,?,?,?,?,?)',
+    ).run(
+      'Ama Serwaa',
+      'artist@example.com',
+      '0551234567',
+      '🧾 Beat Order: Midnight In Accra (GH₵120.00) — BV-DEMO-0001',
+      `🎧 *BEAT ORDER — PROJECT 1*\n*Status:* Paid ✅\n*Reference:* BV-DEMO-0001\n*Customer:* Ama Serwaa\n*Phone:* 0551234567\n*Email:* artist@example.com\n*Items:*\n• Midnight In Accra — Premium Lease (WAV) (GH₵120.00)\n*Total:* GH₵120.00\n*Payment Method:* Mobile Money`,
+      'order',
+      'BV-DEMO-0001',
+      demoUserId || null,
       'unread',
     );
   }
@@ -513,6 +577,15 @@ export const DEFAULT_SETTINGS: Record<string, string> = {
   studio_phone: '',
   studio_policy:
     'Arrive 10 minutes before your session. The balance is payable at the studio before we hit record. Reschedule at least 24 hours in advance to keep your deposit.',
+
+  whatsapp_number: '055 000 0000',
+  whatsapp_country_code: '233',
+  whatsapp_enabled: '1',
+  whatsapp_auto_open: '1',
+  whatsapp_callmebot_key: '',
+  whatsapp_webhook_url: '',
+  whatsapp_cloud_token: '',
+  whatsapp_phone_number_id: '',
 };
 
 export function getSetting(key: string): string {

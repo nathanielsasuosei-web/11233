@@ -4,11 +4,13 @@ import { fulfillOrder } from './fulfill';
 import { bookingReceiptEmail, sendEmail } from './mailer';
 import { markBookingPaid, getBookingByRef, releaseStaleHolds, BOOKING_PAID } from './studio';
 import { formatMoney } from './utils';
+import { bookingWhatsAppUrl, notifyProducerBooking, orderWhatsAppUrl } from './whatsapp';
 
 export type CompleteResult = {
   ok: boolean;
   status: string;
   reference: string;
+  whatsapp_url?: string;
   error?: string;
 };
 
@@ -26,7 +28,13 @@ export async function completeOrder(
   if (!order) return { ok: false, status: 'not_found', reference, error: 'Order not found' };
 
   if (order.status === 'paid') {
-    return { ok: true, status: 'paid', reference };
+    const items = all<any>('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
+    return {
+      ok: true,
+      status: 'paid',
+      reference,
+      whatsapp_url: orderWhatsAppUrl(order, items, base(`/checkout/success?reference=${encodeURIComponent(reference)}`)),
+    };
   }
 
   let method = order.method;
@@ -62,9 +70,9 @@ export async function completeOrder(
     }
   }
 
-  await fulfillOrder(order.id, base);
+  const fulfilled = await fulfillOrder(order.id, base);
 
-  return { ok: true, status: 'paid', reference };
+  return { ok: true, status: 'paid', reference, whatsapp_url: fulfilled.whatsapp_url || '' };
 }
 
 
@@ -93,6 +101,7 @@ export async function completeBooking(
       ok: booking.status === BOOKING_PAID || booking.status === 'confirmed' || booking.status === 'completed',
       status: booking.status,
       reference,
+      whatsapp_url: bookingWhatsAppUrl(booking, base(`/studio/booking/${booking.reference}`)),
       booking,
     };
   }
@@ -150,5 +159,13 @@ export async function completeBooking(
     kind: 'admin_notice',
   });
 
-  return { ok: true, status: BOOKING_PAID, reference, booking: { ...booking, status: BOOKING_PAID } };
+  const wa = await notifyProducerBooking(booking.id, base, { event: 'deposit_paid' });
+
+  return {
+    ok: true,
+    status: BOOKING_PAID,
+    reference,
+    whatsapp_url: wa?.whatsappUrl || '',
+    booking: { ...booking, status: BOOKING_PAID },
+  };
 }
