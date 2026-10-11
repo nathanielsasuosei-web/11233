@@ -34,10 +34,20 @@ const FIELDS: { section: string; key: string; label: string; placeholder?: strin
   { section: 'studio', key: 'studio_address', label: 'Studio address', placeholder: 'Osu, Accra' },
   { section: 'studio', key: 'studio_phone', label: 'Studio phone', placeholder: '+233 55 000 0000' },
   { section: 'studio', key: 'studio_policy', label: 'Booking policy', placeholder: 'Arrive 10 minutes early…', type: 'textarea' },
+
+  { section: 'whatsapp', key: 'whatsapp_number', label: 'Producer WhatsApp number', placeholder: '055 000 0000', help: 'Booking and beat order messages are sent straight to this WhatsApp number.' },
+  { section: 'whatsapp', key: 'whatsapp_country_code', label: 'Country dialing code', placeholder: '233', help: 'Used to convert local numbers like 055… into 23355… for WhatsApp.' },
+  { section: 'whatsapp', key: 'whatsapp_enabled', label: 'Enable WhatsApp notifications', placeholder: '1', help: '1 = active on bookings, orders and contact forms. 0 = off.' },
+  { section: 'whatsapp', key: 'whatsapp_auto_open', label: 'Auto-open WhatsApp on booking / order', placeholder: '1', help: '1 = automatically opens the pre-filled WhatsApp message to you when a customer books or completes an order.' },
+  { section: 'whatsapp', key: 'whatsapp_callmebot_key', label: 'CallMeBot API key (optional)', placeholder: '123456', help: 'Free instant server-to-WhatsApp push to your phone without customer interaction.' },
+  { section: 'whatsapp', key: 'whatsapp_webhook_url', label: 'WhatsApp webhook / gateway URL (optional)', placeholder: 'https://…', help: 'POSTs JSON { to, message, kind, reference, whatsapp_url } whenever a booking or order lands.' },
+  { section: 'whatsapp', key: 'whatsapp_cloud_token', label: 'Meta WhatsApp Cloud API token (optional)', placeholder: 'EAAG…' },
+  { section: 'whatsapp', key: 'whatsapp_phone_number_id', label: 'Meta Phone Number ID (optional)', placeholder: '1029384756…' },
 ];
 
 const SECTIONS = [
   { id: 'Studio', title: 'Studio identity', sub: 'Name, tagline and public contact details.' },
+  { id: 'whatsapp', title: 'WhatsApp & website order alerts', sub: 'Receive studio booking and beat order messages on the website inbox and straight on your WhatsApp.' },
   { id: 'Homepage', title: 'Homepage copy', sub: 'The animated hero pulls its headline and paragraph from here.' },
   { id: 'Currency', title: 'Currency', sub: 'How prices are displayed and charged.' },
   { id: 'payments', title: 'Payments & payouts', sub: 'Connect Paystack to take real Mobile Money and bank payments.' },
@@ -50,11 +60,13 @@ export default function SettingsClient({
   smtp,
   storage,
   paystack,
+  whatsapp = 'wa.me',
 }: {
   settings: Record<string, string>;
   smtp: boolean;
   storage: string;
   paystack: string;
+  whatsapp?: string;
 }) {
   const [form, setForm] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
@@ -62,8 +74,37 @@ export default function SettingsClient({
     return initial;
   });
   const [busy, setBusy] = useState(false);
+  const [testingWa, setTestingWa] = useState(false);
   const toast = useToast();
   const router = useRouter();
+
+  async function testWhatsApp() {
+    const waWin = window.open('about:blank', '_blank');
+    setTestingWa(true);
+    try {
+      await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const res = await fetch('/api/admin/whatsapp/test', { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Could not send test');
+      if (json.whatsapp_url) {
+        if (waWin) waWin.location.href = json.whatsapp_url;
+        else window.open(json.whatsapp_url, '_blank', 'noopener,noreferrer');
+      } else {
+        waWin?.close();
+      }
+      toast('Test alert sent to your Website Inbox & opened on WhatsApp');
+      router.refresh();
+    } catch (err: any) {
+      waWin?.close();
+      toast(err.message || 'Test failed', 'err');
+    } finally {
+      setTestingWa(false);
+    }
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -106,6 +147,12 @@ export default function SettingsClient({
             </div>
             {sec.id === 'payments' && statusPill(paystack === 'live', 'Live payments', 'Demo mode')}
             {sec.id === 'email' && statusPill(smtp, 'SMTP connected', 'Outbox mode')}
+            {sec.id === 'whatsapp' &&
+              statusPill(
+                form.whatsapp_enabled !== '0',
+                whatsapp === 'wa.me' ? 'Direct WhatsApp + Website Inbox' : `Auto API (${whatsapp})`,
+                'Disabled',
+              )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -132,6 +179,30 @@ export default function SettingsClient({
               </div>
             ))}
           </div>
+
+          {sec.id === 'whatsapp' && (
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-500/25 bg-emerald-500/[.06] p-4">
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-[.16em] text-emerald-300">
+                  How it works
+                </div>
+                <p className="mt-1 max-w-xl text-[12px] leading-relaxed text-white/55">
+                  Every studio booking and beat order is automatically delivered to your{' '}
+                  <b className="text-white/80">Website Messages Inbox (/admin/messages)</b> and
+                  prepared for your <b className="text-white/80">WhatsApp ({form.whatsapp_number || '055 000 0000'})</b>.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={testWhatsApp}
+                disabled={testingWa}
+                className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2.5 text-xs font-extrabold uppercase tracking-[.1em] text-black transition hover:bg-emerald-400 disabled:opacity-50"
+              >
+                <span>💬</span>
+                {testingWa ? 'Sending test…' : 'Test Website + WhatsApp alert'}
+              </button>
+            </div>
+          )}
 
           {sec.id === 'payments' && (
             <div className="mt-5 rounded-2xl border border-white/[.07] bg-white/[.02] p-4">

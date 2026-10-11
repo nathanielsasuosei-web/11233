@@ -2,28 +2,33 @@ import Link from 'next/link';
 import AdminHeader from '@/components/AdminHeader';
 import { all, get, getSetting } from '@/lib/db';
 import { ordersWithItems } from '@/lib/queries';
-import { formatMoney, timeAgo } from '@/lib/utils';
+import { buildWhatsAppUrl, formatMoney, timeAgo } from '@/lib/utils';
 import { paystackMode } from '@/lib/paystack';
 import { smtpConfigured as mailConfigured } from '@/lib/mailer';
 import { storageMode } from '@/lib/storage';
+import { listUpcomingBookings } from '@/lib/studio';
+import { producerWhatsAppRaw, whatsappCountryCode, whatsappEnabled } from '@/lib/whatsapp';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Producer dashboard — Project 1' };
 
 export default function AdminHome() {
   const symbol = getSetting('currency_symbol') || 'GH₵';
+  const waPhone = producerWhatsAppRaw();
+  const cc = whatsappCountryCode();
 
   const revenue = get<{ s: number }>("SELECT COALESCE(SUM(total),0) s FROM orders WHERE status='paid'");
   const month = get<{ s: number }>(
     "SELECT COALESCE(SUM(total),0) s FROM orders WHERE status='paid' AND paid_at >= datetime('now','start of month')",
   );
   const orders = get<{ c: number }>('SELECT COUNT(*) c FROM orders');
-  const pending = get<{ c: number }>("SELECT COUNT(*) c FROM orders WHERE status='pending'");
   const beats = get<{ c: number }>("SELECT COUNT(*) c FROM beats WHERE status='published'");
   const artists = get<{ c: number }>('SELECT COUNT(*) c FROM users');
   const unread = get<{ c: number }>("SELECT COUNT(*) c FROM messages WHERE status='unread'");
 
   const recent = ordersWithItems().slice(0, 6);
+  const upcomingBookings = listUpcomingBookings(60).slice(0, 5);
+  const recentMessages = all<any>('SELECT * FROM messages ORDER BY id DESC LIMIT 5');
   const top = all<any>(
     `SELECT b.title, b.slug, b.genre, b.cover_url, SUM(oi.price) rev, COUNT(*) sold
      FROM order_items oi
@@ -36,12 +41,19 @@ export default function AdminHome() {
     { k: 'Total revenue', v: formatMoney(revenue?.s || 0, symbol), icon: '💰' },
     { k: 'This month', v: formatMoney(month?.s || 0, symbol), icon: '📈' },
     { k: 'Orders', v: String(orders?.c || 0), icon: '🧾' },
+    { k: 'Upcoming sessions', v: String(upcomingBookings.length), icon: '🎙️' },
     { k: 'Beats live', v: String(beats?.c || 0), icon: '🎵' },
-    { k: 'Artists', v: String(artists?.c || 0), icon: '👤' },
-    { k: 'Unread messages', v: String(unread?.c || 0), icon: '✉️' },
+    { k: 'Unread inbox', v: String(unread?.c || 0), icon: '✉️' },
   ];
 
   const setup = [
+    {
+      label: 'WhatsApp & Inbox',
+      ok: whatsappEnabled(),
+      on: `Active (${waPhone}) — bookings & orders go to Website + WhatsApp`,
+      off: 'WhatsApp alerts paused',
+      href: '/admin/settings#whatsapp',
+    },
     {
       label: 'Payments',
       ok: paystackMode() === 'live',
@@ -80,7 +92,7 @@ export default function AdminHome() {
       />
 
       {/* setup banners */}
-      <div className="mb-8 grid gap-3 md:grid-cols-3">
+      <div className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {setup.map((s) => (
           <Link
             key={s.label}
@@ -215,6 +227,131 @@ export default function AdminHome() {
                   </span>
                 </div>
               ))
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* studio bookings & website inbox messages */}
+      <div className="mt-8 grid gap-7 xl:grid-cols-2">
+        <section>
+          <div className="mb-4 flex items-end justify-between">
+            <h2 className="display text-lg text-white">UPCOMING STUDIO BOOKINGS</h2>
+            <Link href="/admin/bookings" className="text-xs font-bold text-brand-300 hover:underline">
+              Open calendar →
+            </Link>
+          </div>
+          <div className="card divide-y divide-white/[.05]">
+            {upcomingBookings.length === 0 ? (
+              <p className="px-5 py-10 text-center text-sm text-white/40">No upcoming bookings.</p>
+            ) : (
+              upcomingBookings.map((b) => {
+                const artistWa = b.phone
+                  ? buildWhatsAppUrl(
+                      b.phone,
+                      `Hi ${b.name.split(' ')[0]}, this is ${getSetting('producer_name') || 'the studio'} regarding your ${b.service_title} session on ${b.session_date} at ${b.start_time} (Ref ${b.reference}).`,
+                      cc,
+                    )
+                  : '';
+                return (
+                  <div key={b.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[13px] font-bold text-white">
+                          {b.service_title} · {b.hours}h
+                        </span>
+                        <span
+                          className={`chip text-[9px] ${
+                            b.status === 'deposit_paid' || b.status === 'confirmed'
+                              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                              : 'border-amber-500/30 bg-amber-500/10 text-amber-300'
+                          }`}
+                        >
+                          {b.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="mt-1 truncate text-[12px] text-white/45">
+                        {b.session_date} · {b.start_time}–{b.end_time} · {b.name}
+                        {b.phone ? ` (${b.phone})` : ''}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {artistWa && (
+                        <a
+                          href={artistWa}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-bold text-emerald-200 transition hover:bg-emerald-500/25 hover:text-white"
+                        >
+                          <span>💬</span>
+                          WhatsApp
+                        </a>
+                      )}
+                      <Link href="/admin/bookings" className="btn-ghost !px-3 !py-1.5 text-[11px]">
+                        Manage
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        <section>
+          <div className="mb-4 flex items-end justify-between">
+            <h2 className="display text-lg text-white">BOOKING &amp; ORDER INBOX</h2>
+            <Link href="/admin/messages" className="text-xs font-bold text-brand-300 hover:underline">
+              Open inbox →
+            </Link>
+          </div>
+          <div className="card divide-y divide-white/[.05]">
+            {recentMessages.length === 0 ? (
+              <p className="px-5 py-10 text-center text-sm text-white/40">No messages yet.</p>
+            ) : (
+              recentMessages.map((m: any) => {
+                const waUrl =
+                  m.whatsapp_url ||
+                  (m.phone
+                    ? buildWhatsAppUrl(
+                        m.phone,
+                        `Hi ${m.name.split(' ')[0]}, replying to your message "${m.subject}".`,
+                        cc,
+                      )
+                    : buildWhatsAppUrl(waPhone, `${m.subject}\n\n${m.body}`, cc));
+                return (
+                  <div key={m.id} className="flex items-center justify-between gap-3 p-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        {m.status === 'unread' && (
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-brand-500" />
+                        )}
+                        <Link
+                          href="/admin/messages"
+                          className="truncate text-[13px] font-bold text-white hover:text-brand-300"
+                        >
+                          {m.subject}
+                        </Link>
+                      </div>
+                      <div className="mt-1 truncate text-[11px] text-white/35">
+                        {m.name}
+                        {m.phone ? ` · ${m.phone}` : ` · ${m.email}`} · {timeAgo(m.created_at)}
+                      </div>
+                    </div>
+                    {waUrl && (
+                      <a
+                        href={waUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex shrink-0 items-center gap-1 rounded-full border border-emerald-500/35 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-bold text-emerald-200 transition hover:bg-emerald-500/25 hover:text-white"
+                      >
+                        <span>💬</span>
+                        WhatsApp
+                      </a>
+                    )}
+                  </div>
+                );
+              })
             )}
           </div>
         </section>

@@ -8,6 +8,7 @@ import { completeBooking } from '@/lib/complete';
 import { getSetting } from '@/lib/db';
 import { paystackMode } from '@/lib/paystack';
 import { getBookingByRef } from '@/lib/studio';
+import { bookingWhatsAppUrl, producerWhatsAppRaw } from '@/lib/whatsapp';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Your studio booking — Project 1' };
@@ -15,7 +16,7 @@ export const metadata = { title: 'Your studio booking — Project 1' };
 export default async function StudioConfirmPage({
   searchParams,
 }: {
-  searchParams: { reference?: string; simulate?: string };
+  searchParams: { reference?: string; simulate?: string; whatsapp?: string };
 }) {
   const reference = searchParams.reference;
   if (!reference) redirect('/studio');
@@ -24,17 +25,20 @@ export default async function StudioConfirmPage({
   let booking = getBookingByRef(reference);
   if (!booking) notFound();
 
+  const h = headers();
+  const host = h.get('x-forwarded-host') || h.get('host') || 'localhost:3000';
+  const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || `${proto}://${host}`;
+
   // Paystack has just sent the artist back here — verify the deposit once.
   if (!demo && !searchParams.simulate && booking.status === 'pending') {
-    const h = headers();
-    const host = h.get('x-forwarded-host') || h.get('host') || 'localhost:3000';
-    const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
-    const base = process.env.NEXT_PUBLIC_SITE_URL || `${proto}://${host}`;
     await completeBooking(reference, (p) => `${base}${p}`);
     booking = getBookingByRef(reference) || booking;
   }
 
   const paid = booking.status !== 'pending';
+  const whatsappUrl = bookingWhatsAppUrl(booking, `${base}/studio/booking/${booking.reference}`);
+  const producerPhone = producerWhatsAppRaw();
 
   return (
     <div className="container-x py-14 sm:py-20">
@@ -64,8 +68,37 @@ export default async function StudioConfirmPage({
               <span>Ref {booking.reference}</span>
               <span>·</span>
               <span>{getSetting('studio_name')}</span>
+              <span>·</span>
+              <span className="text-emerald-300">Sent to Producer Inbox &amp; WhatsApp</span>
             </div>
           </div>
+
+          {whatsappUrl && (
+            <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[.08] p-5 sm:flex-row">
+              <div className="flex items-start gap-3.5">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-emerald-500/30 bg-emerald-500/20 text-xl">
+                  💬
+                </span>
+                <div>
+                  <div className="text-[13px] font-bold text-white">
+                    Send booking straight to {getSetting('producer_name') || 'the producer'}&apos;s WhatsApp
+                  </div>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-white/55">
+                    Your booking order is already in the studio inbox on the website. Tap to open WhatsApp ({producerPhone}) with your full session details ready to send.
+                  </p>
+                </div>
+              </div>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-xs font-extrabold uppercase tracking-[.1em] text-black shadow-[0_0_30px_-8px_rgba(16,185,129,.8)] transition hover:bg-emerald-400"
+              >
+                <span>💬</span>
+                Send on WhatsApp
+              </a>
+            </div>
+          )}
 
           {demo && !paid && (
             <div className="mt-6">

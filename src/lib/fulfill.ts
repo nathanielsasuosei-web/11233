@@ -1,6 +1,7 @@
 import { all, get, getSetting, run } from './db';
 import { beatDeliveryEmail, sendEmail } from './mailer';
 import { formatMoney, LICENSES } from './utils';
+import { notifyProducerOrder } from './whatsapp';
 
 export function absoluteUrl(req: Request, path: string) {
   const env = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '');
@@ -79,5 +80,7 @@ export async function fulfillOrder(orderId: number, base: (p: string) => string)
     kind: 'admin_notice',
   });
 
-  return { ok: result.ok, mode: result.mode, items: items.length };
+  const wa = await notifyProducerOrder(orderId, base, { event: 'paid' });
+
+  return { ok: result.ok, mode: result.mode, items: items.length, whatsapp_url: wa?.whatsappUrl || '' };
 }

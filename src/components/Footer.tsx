@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { buildWhatsAppUrl } from '@/lib/utils';
 import SubscribeForm from './SubscribeForm';
 
 export default function Footer({
@@ -7,6 +8,14 @@ export default function Footer({
   settings: Record<string, string>;
 }) {
   const studio = settings.studio_name || 'PROJECT 1';
+  const waNumber = settings.whatsapp_number || settings.studio_phone || settings.momo_number || '';
+  const waHref = waNumber
+    ? buildWhatsAppUrl(
+        waNumber,
+        `Hi ${settings.producer_name || 'Producer'}, I'm reaching out from ${studio}.`,
+        settings.whatsapp_country_code || '233',
+      )
+    : '';
   return (
     <footer className="relative mt-24 overflow-hidden border-t border-white/[.07] bg-ink-900">
       <div className="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[900px] -translate-x-1/2 rounded-full bg-brand-600/10 blur-[100px]" />
@@ -65,6 +74,18 @@ export default function Footer({
             </div>
             <ul className="space-y-2.5 text-sm text-white/55">
               <li>{settings.support_email}</li>
+              {waNumber && (
+                <li>
+                  <a
+                    href={waHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-300 hover:underline"
+                  >
+                    💬 WhatsApp: {waNumber}
+                  </a>
+                </li>
+              )}
               <li>Mobile Money: {settings.momo_number}</li>
               <li>{settings.bank_name} · {settings.bank_account_number}</li>
             </ul>

@@ -131,7 +131,8 @@ export function siteStats() {
 
 export function ordersWithItems(userId?: number) {
   const orders = all<any>(
-    `SELECT o.*, u.name, u.email FROM orders o LEFT JOIN users u ON u.id = o.user_id
+    `SELECT o.*, u.name, u.email, COALESCE(NULLIF(o.pay_phone, ''), u.phone, '') as phone
+     FROM orders o LEFT JOIN users u ON u.id = o.user_id
      ${userId ? 'WHERE o.user_id = ?' : ''} ORDER BY o.id DESC`,
     userId ? [userId] : [],
   );
@@ -152,7 +153,8 @@ export function ordersWithItems(userId?: number) {
 
 export function getOrderByRef(ref: string) {
   const order = get<any>(
-    `SELECT o.*, u.name, u.email FROM orders o LEFT JOIN users u ON u.id = o.user_id WHERE o.reference = ?`,
+    `SELECT o.*, u.name, u.email, COALESCE(NULLIF(o.pay_phone, ''), u.phone, '') as phone
+     FROM orders o LEFT JOIN users u ON u.id = o.user_id WHERE o.reference = ?`,
     [ref],
   );
   if (!order) return null;

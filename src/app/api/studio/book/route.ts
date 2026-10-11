@@ -4,7 +4,9 @@ import { getSetting } from '@/lib/db';
 import { bookingPendingEmail, sendEmail } from '@/lib/mailer';
 import { readSession } from '@/lib/auth';
 import { initializeTransaction, paystackMode } from '@/lib/paystack';
+import { absoluteUrl } from '@/lib/fulfill';
 import { formatMoney } from '@/lib/utils';
+import { notifyProducerBooking } from '@/lib/whatsapp';
 import {
   availability,
   createBooking,
@@ -112,8 +114,13 @@ export async function POST(req: Request) {
     payPhone: input.payPhone,
   });
 
-  const origin = new URL(req.url).origin;
-  const confirmUrl = `${origin}/studio/confirm?reference=${encodeURIComponent(booking.reference)}`;
+  const confirmPath = `/studio/confirm?reference=${encodeURIComponent(booking.reference)}`;
+  const confirmUrl = absoluteUrl(req, confirmPath);
+
+  // Deliver the booking order message to the producer's website inbox & WhatsApp immediately
+  const wa = await notifyProducerBooking(booking.id, (p) => absoluteUrl(req, p), {
+    event: input.holdOnly ? 'hold' : 'created',
+  });
 
   // "Hold my slot" — no payment yet; the producer confirms manually.
   if (input.holdOnly || paystackMode() === 'demo') {
@@ -131,7 +138,7 @@ export async function POST(req: Request) {
           hours: input.hours,
           deposit: formatMoney(booking.deposit, symbol),
           total: formatMoney(booking.price, symbol),
-          payUrl: `${origin}/studio/booking/${booking.reference}`,
+          payUrl: absoluteUrl(req, `/studio/booking/${booking.reference}`),
         }),
         kind: 'booking_pending',
       });
@@ -142,7 +149,7 @@ export async function POST(req: Request) {
           <p>${input.name} asked to hold ${input.hours}h of ${service.title} on ${input.date} at ${input.start} and pay the ${formatMoney(booking.deposit, symbol)} deposit at the studio. Total ${formatMoney(booking.price, symbol)}.</p>
           <p>The slot stays blocked for other artists until you confirm it or the hold expires.</p>
           <p>${input.phone ? `<b>Phone:</b> ${input.phone}<br>` : ''}${input.notes ? `<b>Notes:</b> ${input.notes}` : ''}</p>
-          <p><a href="${origin}/admin/bookings">Confirm it in the booking calendar</a></p></div>`,
+          <p><a href="${absoluteUrl(req, '/admin/bookings')}">Confirm it in the booking calendar</a></p></div>`,
         kind: 'admin_notice',
       });
     }
@@ -153,9 +160,10 @@ export async function POST(req: Request) {
       balance: booking.balance,
       depositPercent: depositPercent(),
       demo: paystackMode() === 'demo',
+      whatsapp_url: wa?.whatsappUrl || '',
       // The confirm page decides whether to verify or offer the demo approval,
       // so both paths land on the same clean link.
-      authorization_url: confirmUrl,
+      authorization_url: confirmPath,
     });
   }
 
@@ -178,6 +186,7 @@ export async function POST(req: Request) {
       ok: true,
       reference: booking.reference,
       authorization_url: init.authorization_url,
+      whatsapp_url: wa?.whatsappUrl || '',
       deposit: booking.deposit,
       balance: booking.balance,
       depositPercent: depositPercent(),

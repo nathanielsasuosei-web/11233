@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { paystackMode } from '@/lib/paystack';
-import { initializeTransaction } from '@/lib/paystack';
+import { paystackMode, initializeTransaction } from '@/lib/paystack';
+import { absoluteUrl } from '@/lib/fulfill';
 import { getSetting } from '@/lib/db';
 import { getBookingByRef, releaseStaleHolds } from '@/lib/studio';
 
@@ -19,11 +19,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'The deposit for this booking is already settled.' }, { status: 409 });
   }
 
-  const origin = new URL(req.url).origin;
-  const callbackUrl = `${origin}/studio/confirm?reference=${encodeURIComponent(booking.reference)}`;
+  const callbackPath = `/studio/confirm?reference=${encodeURIComponent(booking.reference)}`;
+  const callbackUrl = absoluteUrl(req, callbackPath);
 
   if (paystackMode() === 'demo') {
-    return NextResponse.json({ ok: true, authorization_url: `${callbackUrl}&simulate=1`, demo: true });
+    return NextResponse.json({ ok: true, authorization_url: `${callbackPath}&simulate=1`, demo: true });
   }
 
   try {

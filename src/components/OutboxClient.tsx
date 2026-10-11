@@ -14,6 +14,19 @@ export type EmailRow = {
   created_at: string;
 };
 
+export type WhatsAppLogRow = {
+  id: number;
+  to_phone: string;
+  message: string;
+  whatsapp_url: string;
+  kind: string;
+  reference: string;
+  status: string;
+  provider: string;
+  error: string;
+  created_at: string;
+};
+
 const KIND_LABEL: Record<string, string> = {
   beat_delivery: 'Beat delivery',
   order_receipt: 'Order receipt',
@@ -21,15 +34,122 @@ const KIND_LABEL: Record<string, string> = {
   contact: 'Contact form',
   message_reply: 'Message reply',
   admin_notice: 'Admin notice',
+  booking_receipt: 'Booking receipt',
+  booking_pending: 'Booking hold',
+  booking_cancelled: 'Booking cancelled',
+  booking: 'Studio booking',
+  order: 'Beat order',
+  enquiry: 'Enquiry',
+  test: 'Test alert',
   general: 'General',
 };
 
-export default function OutboxClient({ emails, smtp }: { emails: EmailRow[]; smtp: boolean }) {
+export default function OutboxClient({
+  emails,
+  whatsappLogs = [],
+  smtp,
+}: {
+  emails: EmailRow[];
+  whatsappLogs?: WhatsAppLogRow[];
+  smtp: boolean;
+}) {
   const [open, setOpen] = useState<EmailRow | null>(null);
+  const [tab, setTab] = useState<'whatsapp' | 'email'>('whatsapp');
 
   return (
     <>
-      {!smtp && (
+      <div className="mb-6 flex flex-wrap gap-2">
+        <button
+          onClick={() => setTab('whatsapp')}
+          className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[.1em] transition ${
+            tab === 'whatsapp'
+              ? 'border-emerald-500 bg-emerald-500 text-black'
+              : 'border-white/10 bg-white/[.03] text-white/50 hover:text-white'
+          }`}
+        >
+          💬 WhatsApp Alerts ({whatsappLogs.length})
+        </button>
+        <button
+          onClick={() => setTab('email')}
+          className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[.1em] transition ${
+            tab === 'email'
+              ? 'border-brand-500 bg-brand-500 text-white'
+              : 'border-white/10 bg-white/[.03] text-white/50 hover:text-white'
+          }`}
+        >
+          ✉️ Email Outbox ({emails.length})
+        </button>
+      </div>
+
+      {tab === 'whatsapp' ? (
+        <div className="card overflow-x-auto">
+          <table className="w-full min-w-[720px]">
+            <thead className="border-b border-white/[.07]">
+              <tr>
+                <th className="table-th">Producer WhatsApp</th>
+                <th className="table-th">Type &amp; Ref</th>
+                <th className="table-th">Preview</th>
+                <th className="table-th">Status</th>
+                <th className="table-th text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[.05]">
+              {whatsappLogs.map((w) => (
+                <tr key={w.id} className="hover:bg-white/[.02]">
+                  <td className="table-td font-mono text-[12px] text-white/75">+{w.to_phone}</td>
+                  <td className="table-td">
+                    <div className="text-[12px] font-bold text-white">
+                      {KIND_LABEL[w.kind] || w.kind}
+                    </div>
+                    {w.reference && (
+                      <div className="font-mono text-[10px] text-white/40">{w.reference}</div>
+                    )}
+                  </td>
+                  <td className="table-td max-w-[300px]">
+                    <div className="line-clamp-2 whitespace-pre-wrap text-[12px] text-white/55">
+                      {w.message}
+                    </div>
+                  </td>
+                  <td className="table-td">
+                    <span
+                      className={`chip ${
+                        w.status === 'sent'
+                          ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+                          : w.status === 'failed'
+                            ? 'border-red-500/30 bg-red-500/10 text-red-300'
+                            : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+                      }`}
+                    >
+                      {w.status === 'ready' ? 'wa.me ready' : w.status}
+                    </span>
+                    <div className="mt-1 text-[10px] text-white/30">{timeAgo(w.created_at)}</div>
+                  </td>
+                  <td className="table-td text-right">
+                    {w.whatsapp_url && (
+                      <a
+                        href={w.whatsapp_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-1.5 text-[11px] font-bold text-emerald-200 transition hover:bg-emerald-500/25 hover:text-white"
+                      >
+                        <span>💬</span>
+                        Open on WhatsApp
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {whatsappLogs.length === 0 && (
+            <p className="px-5 py-12 text-center text-sm text-white/40">
+              No WhatsApp alerts logged yet. They appear here whenever a booking or beat order is placed.
+            </p>
+          )}
+        </div>
+      ) : (
+        <>
+          {!smtp && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-500/25 bg-amber-500/[.07] p-4">
           <span className="text-lg">ℹ️</span>
           <p className="text-[12px] leading-relaxed text-amber-200/80">
@@ -89,6 +209,8 @@ export default function OutboxClient({ emails, smtp }: { emails: EmailRow[]; smt
           </p>
         )}
       </div>
+        </>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">

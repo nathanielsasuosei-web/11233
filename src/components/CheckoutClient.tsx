@@ -49,12 +49,13 @@ export default function CheckoutClient({
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function pay() {
+  async function pay(sendWhatsApp = false) {
     if (!cart.items.length) return;
-    if (method === 'mobile_money' && phone.replace(/\D/g, '').length < 9) {
+    if (!sendWhatsApp && method === 'mobile_money' && phone.replace(/\D/g, '').length < 9) {
       toast('Enter the Mobile Money number that will pay', 'err');
       return;
     }
+    const waWin = sendWhatsApp ? window.open('about:blank', '_blank') : null;
     setLoading(true);
     try {
       const res = await fetch('/api/checkout/initialize', {
@@ -63,18 +64,29 @@ export default function CheckoutClient({
         body: JSON.stringify({
           items: cart.items.map((i) => ({ beatId: i.beatId, license: i.license })),
           method,
-          phone: network ? `${network} · ${phone}` : phone,
+          phone: phone ? (network ? `${network} · ${phone}` : phone) : '',
         }),
       });
       const json = await res.json();
       if (!res.ok) {
+        waWin?.close();
         toast(json.error || 'Checkout failed', 'err');
         if (json.needAuth) window.location.href = '/login?next=/checkout';
         return;
       }
+      if (sendWhatsApp && json.whatsapp_url) {
+        if (waWin) {
+          waWin.location.href = json.whatsapp_url;
+        } else {
+          window.open(json.whatsapp_url, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        waWin?.close();
+      }
       cart.clear();
       window.location.href = json.authorization_url;
     } catch {
+      waWin?.close();
       toast('Network error — please try again', 'err');
     } finally {
       setLoading(false);
@@ -257,7 +269,7 @@ export default function CheckoutClient({
             </div>
           </div>
 
-          <button onClick={pay} disabled={loading} className="btn-red mt-6 w-full !py-4 text-sm">
+          <button onClick={() => pay(false)} disabled={loading} className="btn-red mt-6 w-full !py-4 text-sm">
             {loading ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -266,6 +278,15 @@ export default function CheckoutClient({
             ) : (
               <>Pay {money(cart.total)} →</>
             )}
+          </button>
+
+          <button
+            onClick={() => pay(true)}
+            disabled={loading}
+            className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-4 py-3 text-[11px] font-bold uppercase tracking-[.12em] text-emerald-200 transition hover:border-emerald-400/60 hover:bg-emerald-500/25 hover:text-white disabled:opacity-40"
+          >
+            <span>💬</span>
+            Order &amp; send straight to WhatsApp
           </button>
 
           {demo && (

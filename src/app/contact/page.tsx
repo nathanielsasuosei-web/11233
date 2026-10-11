@@ -3,6 +3,7 @@ import Reveal from '@/components/Reveal';
 import ContactForm from '@/components/ContactForm';
 import { getSettings } from '@/lib/db';
 import { requireArtist } from '@/lib/auth';
+import { buildWhatsAppUrl } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Contact — Project 1' };
@@ -24,7 +25,22 @@ export default async function ContactPage({
     ? SERVICE_SUBJECTS[searchParams.service.toLowerCase()]
     : undefined;
 
+  const waNumber = s.whatsapp_number || s.studio_phone || s.momo_number || '055 000 0000';
+  const waHref = buildWhatsAppUrl(
+    waNumber,
+    `Hi ${s.producer_name || 'Producer'}, I want to book a session / order beats on ${s.studio_name || 'Project 1'}.`,
+    s.whatsapp_country_code || '233',
+  );
+
   const cards = [
+    {
+      icon: '💬',
+      label: 'WhatsApp direct',
+      value: waNumber,
+      sub: 'Tap to message the producer straight on WhatsApp',
+      href: waHref,
+      external: true,
+    },
     { icon: '✉️', label: 'Email', value: s.support_email, href: `mailto:${s.support_email}` },
     { icon: '📱', label: 'Mobile Money enquiries', value: s.momo_number, href: `tel:${s.momo_number.replace(/\s/g, '')}` },
     {
@@ -68,6 +84,8 @@ export default async function ContactPage({
                   {c.href ? (
                     <a
                       href={c.href}
+                      target={(c as any).external ? '_blank' : undefined}
+                      rel={(c as any).external ? 'noopener noreferrer' : undefined}
                       className="mt-1 block break-words text-[14px] font-bold text-white transition hover:text-brand-300"
                     >
                       {c.value}
@@ -98,6 +116,7 @@ export default async function ContactPage({
           <ContactForm
             name={user?.name || ''}
             email={user?.email || ''}
+            phone={user?.phone || ''}
             initialSubject={initialSubject}
           />
         </Reveal>

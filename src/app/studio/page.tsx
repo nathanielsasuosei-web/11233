@@ -4,7 +4,7 @@ import Reveal from '@/components/Reveal';
 import SectionHeading from '@/components/SectionHeading';
 import StudioBookingForm from '@/components/StudioBookingForm';
 import { getSettings } from '@/lib/db';
-import { formatMoney } from '@/lib/utils';
+import { buildWhatsAppUrl, formatMoney } from '@/lib/utils';
 import { requireArtist } from '@/lib/auth';
 import {
   bookingEnabled,
@@ -79,18 +79,32 @@ export default async function StudioPage({
                 Opening hours
               </div>
               <div className="display mt-1.5 text-lg text-white">{openingHoursLabel()}</div>
-              {(settings.studio_phone || settings.support_email) && (
-                <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-white/45">
-                  {settings.studio_phone && (
-                    <a href={`tel:${settings.studio_phone.replace(/\s/g, '')}`} className="hover:text-brand-300">
-                      {settings.studio_phone}
-                    </a>
-                  )}
+              <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-white/45">
+                {(settings.whatsapp_number || settings.studio_phone || settings.momo_number) && (
+                  <a
+                    href={buildWhatsAppUrl(
+                      settings.whatsapp_number || settings.studio_phone || settings.momo_number,
+                      `Hi ${settings.producer_name || 'Producer'}, I want to book a studio session at ${settings.studio_name || 'Project 1'}.`,
+                      settings.whatsapp_country_code || '233',
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold text-emerald-300 hover:underline"
+                  >
+                    💬 WhatsApp: {settings.whatsapp_number || settings.studio_phone || settings.momo_number}
+                  </a>
+                )}
+                {settings.studio_phone && (
+                  <a href={`tel:${settings.studio_phone.replace(/\s/g, '')}`} className="hover:text-brand-300">
+                    {settings.studio_phone}
+                  </a>
+                )}
+                {settings.support_email && (
                   <a href={`mailto:${settings.support_email}`} className="hover:text-brand-300">
                     {settings.support_email}
                   </a>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </Reveal>

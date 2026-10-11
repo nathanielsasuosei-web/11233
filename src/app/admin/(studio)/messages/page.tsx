@@ -13,7 +13,7 @@ export default function AdminMessagesPage() {
         eyebrow="Inbox"
         title="MES"
         accent="SAGES"
-        sub="Enquiries from the contact form and artist accounts. Replies are emailed straight back to the sender."
+        sub="Studio bookings, beat orders, and artist enquiries received on the website — reply by email or jump straight to WhatsApp."
       />
       <MessagesManager messages={messages} />
     </div>

@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import Reveal from '@/components/Reveal';
 import { getOrderByRef } from '@/lib/queries';
 import { getSetting, get } from '@/lib/db';
 import { formatMoney, timeAgo } from '@/lib/utils';
 import { requireArtist } from '@/lib/auth';
 import DownloadRow from '@/components/DownloadRow';
+import { orderWhatsAppUrl, producerWhatsAppRaw } from '@/lib/whatsapp';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +26,17 @@ export default async function SuccessPage({
   const user = await requireArtist();
   const mine = user && Number(user.id) === Number(order.user_id);
   if (!mine && order.status !== 'paid') notFound();
+
+  const h = headers();
+  const host = h.get('x-forwarded-host') || h.get('host') || 'localhost:3000';
+  const proto = h.get('x-forwarded-proto') || (host.startsWith('localhost') ? 'http' : 'https');
+  const base = process.env.NEXT_PUBLIC_SITE_URL || `${proto}://${host}`;
+  const whatsappUrl = orderWhatsAppUrl(
+    order,
+    order.items,
+    `${base}/checkout/success?reference=${encodeURIComponent(order.reference)}`,
+  );
+  const producerPhone = producerWhatsAppRaw();
 
   const log = get<any>(
     "SELECT * FROM email_log WHERE kind = 'beat_delivery' AND subject LIKE ? ORDER BY id DESC LIMIT 1",
@@ -72,6 +85,34 @@ export default async function SuccessPage({
               </dl>
             </div>
           </div>
+
+          {/* WhatsApp straight to producer */}
+          {whatsappUrl && (
+            <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/[.08] p-5 sm:flex-row">
+              <div className="flex items-start gap-3.5">
+                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-emerald-500/30 bg-emerald-500/20 text-xl">
+                  💬
+                </span>
+                <div>
+                  <div className="text-[13px] font-bold text-white">
+                    Send order receipt straight to {getSetting('producer_name') || 'the producer'}&apos;s WhatsApp
+                  </div>
+                  <p className="mt-0.5 text-[12px] leading-relaxed text-white/55">
+                    Your order message is already in the producer&apos;s website inbox. Tap to also send your order summary straight to WhatsApp ({producerPhone}) for stems, custom edits or quick support.
+                  </p>
+                </div>
+              </div>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-xs font-extrabold uppercase tracking-[.1em] text-black shadow-[0_0_30px_-8px_rgba(16,185,129,.8)] transition hover:bg-emerald-400"
+              >
+                <span>💬</span>
+                Send on WhatsApp
+              </a>
+            </div>
+          )}
 
           {/* downloads */}
           <div className="mt-8">

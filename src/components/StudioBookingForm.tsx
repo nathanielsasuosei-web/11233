@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useMoney } from './SettingsProvider';
+import { useMoney, useSettings } from './SettingsProvider';
 import { useToast } from './Toast';
 
 export type BookableService = {
@@ -54,6 +54,7 @@ export default function StudioBookingForm({
   hours: string;
 }) {
   const money = useMoney();
+  const { settings } = useSettings();
   const toast = useToast();
 
   const [serviceId, setServiceId] = useState<number>(() => {
@@ -121,16 +122,21 @@ export default function StudioBookingForm({
     return out;
   }, [service]);
 
-  async function submit(holdOnly = false) {
+  async function submit(holdOnly = false, sendWhatsApp = false) {
     if (!service) return;
     if (!date) return toast('Pick a date', 'err');
     if (start == null) return toast('Pick a start time', 'err');
     if (form.name.trim().length < 2) return toast('Tell us who is coming in', 'err');
     if (!/^\S+@\S+\.\S+$/.test(form.email)) return toast('Enter a valid email address', 'err');
     if (form.phone.replace(/\D/g, '').length < 9) return toast('Enter a phone number we can call', 'err');
-    if (method !== 'card' && payPhone.replace(/\D/g, '').length < 9) {
+    const effectivePayPhone = payPhone || form.phone;
+    if (!holdOnly && method !== 'card' && effectivePayPhone.replace(/\D/g, '').length < 9) {
       return toast('Enter the number that will pay the deposit', 'err');
     }
+
+    const shouldOpenWhatsApp =
+      sendWhatsApp || (holdOnly && settings.whatsapp_auto_open !== '0' && settings.whatsapp_enabled !== '0');
+    const waWin = shouldOpenWhatsApp ? window.open('about:blank', '_blank') : null;
 
     setBusy(true);
     try {
@@ -147,22 +153,32 @@ export default function StudioBookingForm({
           phone: form.phone,
           notes,
           method: method === 'card' ? 'card' : 'mobile_money',
-          payPhone: payPhone ? `${METHODS.find((m) => m.id === method)?.label} · ${payPhone}` : '',
+          payPhone: effectivePayPhone
+            ? `${METHODS.find((m) => m.id === method)?.label} · ${effectivePayPhone}`
+            : '',
           holdOnly,
         }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
+        waWin?.close();
         toast(json.error || 'Could not create the booking', 'err');
         load();
         return;
       }
-      if (holdOnly) {
-        window.location.href = json.authorization_url || `/studio/confirm?reference=${json.reference}`;
-        return;
+      if (shouldOpenWhatsApp && json.whatsapp_url) {
+        if (waWin) {
+          waWin.location.href = json.whatsapp_url;
+        } else {
+          window.open(json.whatsapp_url, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        waWin?.close();
       }
-      window.location.href = json.authorization_url || `/studio/confirm?reference=${json.reference}`;
+      const nextUrl = json.authorization_url || `/studio/confirm?reference=${json.reference}`;
+      window.location.href = sendWhatsApp ? `${nextUrl}&whatsapp=1` : nextUrl;
     } catch {
+      waWin?.close();
       toast('Network error — please try again', 'err');
     } finally {
       setBusy(false);
@@ -420,7 +436,7 @@ export default function StudioBookingForm({
           </div>
 
           <button
-            onClick={() => submit(false)}
+            onClick={() => submit(false, false)}
             disabled={busy || start == null}
             className="btn-red mt-5 w-full !py-4 text-sm disabled:opacity-50"
           >
@@ -436,15 +452,23 @@ export default function StudioBookingForm({
             )}
           </button>
           <button
-            onClick={() => submit(true)}
+            onClick={() => submit(true, true)}
             disabled={busy || start == null}
-            className="mt-2.5 w-full rounded-xl border border-white/10 bg-white/[.02] px-4 py-3 text-[11px] font-bold uppercase tracking-[.14em] text-white/50 transition hover:border-white/25 hover:text-white disabled:opacity-40"
+            className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-4 py-3 text-[11px] font-bold uppercase tracking-[.12em] text-emerald-200 transition hover:border-emerald-400/60 hover:bg-emerald-500/25 hover:text-white disabled:opacity-40"
+          >
+            <span>💬</span>
+            Book &amp; send straight to WhatsApp
+          </button>
+          <button
+            onClick={() => submit(true, false)}
+            disabled={busy || start == null}
+            className="mt-2 w-full rounded-xl border border-white/10 bg-white/[.02] px-4 py-3 text-[11px] font-bold uppercase tracking-[.14em] text-white/50 transition hover:border-white/25 hover:text-white disabled:opacity-40"
           >
             Hold my slot, pay at the studio
           </button>
 
           <p className="mt-4 text-[10px] uppercase tracking-[.14em] text-white/25">
-            🔒 Secured by Paystack · we never see your PIN
+            🔒 Instant website + WhatsApp notification to the producer
           </p>
 
           <div className="mt-5 rounded-xl border border-white/[.07] bg-white/[.02] p-3.5">
