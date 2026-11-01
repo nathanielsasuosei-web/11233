@@ -69,6 +69,38 @@ Both are overridable with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` env vars.
 
 ---
 
+## Neon infrastructure (prepared; not deployed)
+
+`neon.ts` declares a private `assets` bucket, Managed Better Auth, AI Gateway,
+Realtime, and an example `hello` Function alongside the project's Postgres
+service. The Neon skill and project-scoped MCP configuration are under
+`.agents/` and `.codex/`. **These files alone do not create a Neon project or
+enable any cloud services.**
+
+Once the Neon API is reachable and a Neon account with access to organization
+`org-billowing-breeze-04002154` has signed in with `neon login`, finish the
+Ohio-region setup from this directory:
+
+```bash
+neon link --org-id org-billowing-breeze-04002154 \
+  --project-name beatvault-studio --region-id aws-us-east-2 -y --no-config
+neon config plan
+neon config apply
+```
+
+`neon link` pulls connection variables into a Git-ignored `.env` file when the
+project is linked. Review the plan before applying; use the Neon Console to
+verify all services are available on the account's plan. Restart the coding
+agent to load its MCP configuration and complete MCP sign-in on first use.
+
+**The website still uses SQLite and its existing session/login and upload
+implementations.** Provisioning these Neon services does not migrate the
+website's data or switch its runtime to Postgres, Better Auth or Neon Object
+Storage. That migration is a separate task; keep the existing `DATABASE_PATH`
+for SQLite until it is done.
+
+---
+
 ## ☁️ Deploying to Vercel
 
 The app runs on Vercel's serverless runtime with zero configuration, but that
