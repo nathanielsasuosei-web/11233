@@ -3,7 +3,7 @@ import SettingsClient from '@/components/SettingsClient';
 import { getSettings } from '@/lib/db';
 import { smtpConfigured } from '@/lib/mailer';
 import { paystackMode } from '@/lib/paystack';
-import { storageMode } from '@/lib/storage';
+import { storageInfo } from '@/lib/storage';
 import { whatsappMode } from '@/lib/whatsapp';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export default function AdminSettingsPage() {
       <SettingsClient
         settings={getSettings()}
         smtp={smtpConfigured()}
-        storage={storageMode()}
+        storage={storageInfo()}
         paystack={paystackMode()}
         whatsapp={whatsappMode()}
       />

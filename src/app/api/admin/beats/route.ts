@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 import { get, run } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
-import { saveUpload } from '@/lib/storage';
+import { deleteUpload, saveUpload, storageMode } from '@/lib/storage';
 import { slugify, toMinor, randomToken } from '@/lib/utils';
+
+/** Best-effort removal of stored files that belong to this app. */
+async function cleanupFiles(urls: (string | null | undefined)[]) {
+  await Promise.all(
+    urls
+      .filter(
+        (u): u is string =>
+          Boolean(u) &&
+          (u!.startsWith('/uploads/') || u!.startsWith('/api/media/') || storageMode() === 's3'),
+      )
+      .map((u) => deleteUpload(u).catch(() => {})),
+  );
+}
 
 async function guard() {
   const admin = await requireAdmin();
@@ -98,6 +111,13 @@ export async function PUT(req: Request) {
       ? await saveUpload(preview, 'beats', preview.name)
       : str('preview_url');
 
+  // New uploads replaced the old files — remove the orphaned objects/disk files.
+  await cleanupFiles([
+    coverUrl && coverUrl !== existing.cover_url ? existing.cover_url : null,
+    audioUrl && audioUrl !== existing.audio_url ? existing.audio_url : null,
+    previewUrl && previewUrl !== existing.preview_url ? existing.preview_url : null,
+  ]);
+
   run(
     `UPDATE beats SET title=?, description=?, genre=?, mood=?, bpm=?, musical_key=?, tags=?,
       cover_url=?, audio_url=?, preview_url=?, video_url=?,
@@ -133,6 +153,13 @@ export async function DELETE(req: Request) {
   if (!(await guard())) return NextResponse.json({ error: 'Not authorised' }, { status: 401 });
   const id = Number(new URL(req.url).searchParams.get('id'));
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  const beat = get<any>(
+    'SELECT cover_url, audio_url, preview_url, video_url FROM beats WHERE id = ?',
+    [id],
+  );
   run('DELETE FROM beats WHERE id = ?', [id]);
+  if (beat) {
+    await cleanupFiles([beat.cover_url, beat.audio_url, beat.preview_url, beat.video_url]);
+  }
   return NextResponse.json({ ok: true });
 }

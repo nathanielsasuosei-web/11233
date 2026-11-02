@@ -93,11 +93,14 @@ project is linked. Review the plan before applying; use the Neon Console to
 verify all services are available on the account's plan. Restart the coding
 agent to load its MCP configuration and complete MCP sign-in on first use.
 
-**The website still uses SQLite and its existing session/login and upload
+**The website still uses SQLite and its existing session/login
 implementations.** Provisioning these Neon services does not migrate the
-website's data or switch its runtime to Postgres, Better Auth or Neon Object
-Storage. That migration is a separate task; keep the existing `DATABASE_PATH`
-for SQLite until it is done.
+website's data or switch its runtime to Postgres or Better Auth — keep the
+existing `DATABASE_PATH` for SQLite until that separate task is done.
+**Object storage is wired up, though:** declare the `assets` bucket in
+`neon.ts` (already declared, private), run `neon deploy`, set
+`S3_BUCKET=assets`, and all uploads/reads/deletes go to Neon Storage via
+presigned URLs (see [🗄 Storage](#🗄-storage)).
 
 ---
 
@@ -220,19 +223,30 @@ producer, contact-form notification, and producer replies.
 
 ## 🗄 Storage
 
-Uploads default to local disk (`public/uploads`). To use S3-compatible storage
-(AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi…):
+Uploads default to local disk (`public/uploads`). To use real object storage —
+AWS S3, Cloudflare R2, MinIO, Backblaze B2, Wasabi, or a **Neon Storage bucket**
+(the private `assets` bucket declared in `neon.ts`):
 
 ```env
+# Generic S3-compatible provider:
 S3_BUCKET=beatvault
 S3_REGION=auto
 S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
 S3_ACCESS_KEY_ID=...
 S3_SECRET_ACCESS_KEY=...
-S3_PUBLIC_URL=https://cdn.your-domain.com
+
+# Neon Storage: `neon deploy` injects AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
+# AWS_ENDPOINT_URL_S3 and AWS_REGION automatically — just add:
+S3_BUCKET=assets
 ```
 
-The storage driver is selected automatically — no code changes needed.
+The storage driver is selected automatically — no code changes needed. In S3
+mode the app stores a stable `/api/media/<key>` URL in the database and serves
+every read (previews, covers, videos, paid downloads) as a **short-lived
+presigned URL**, so private buckets work end to end — set `S3_SIGNED_TTL` to
+change the link lifetime (default 1 hour). Deleting a beat or video also
+deletes its files from the bucket. Optional knobs: `S3_PUBLIC_URL` (public
+bucket/CDN base), `S3_FORCE_PATH_STYLE`, `S3_ACL`, `S3_CACHE_CONTROL`.
 
 ---
 

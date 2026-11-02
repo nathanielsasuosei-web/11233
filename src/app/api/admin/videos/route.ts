@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { run } from '@/lib/db';
+import { get, run } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
-import { saveUpload } from '@/lib/storage';
+import { deleteUpload, saveUpload, storageMode } from '@/lib/storage';
 
 export async function POST(req: Request) {
   if (!(await requireAdmin())) return NextResponse.json({ error: 'Not authorised' }, { status: 401 });
@@ -50,6 +50,17 @@ export async function DELETE(req: Request) {
   if (!(await requireAdmin())) return NextResponse.json({ error: 'Not authorised' }, { status: 401 });
   const id = Number(new URL(req.url).searchParams.get('id'));
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  const video = get<any>('SELECT video_url, thumbnail_url FROM videos WHERE id = ?', [id]);
   run('DELETE FROM videos WHERE id = ?', [id]);
+  if (video) {
+    // Only uploaded files belong to this app's storage — YouTube links are left alone.
+    const ours = (u: string) =>
+      u && (u.startsWith('/uploads/') || u.startsWith('/api/media/') || storageMode() === 's3');
+    await Promise.all(
+      [video.video_url, video.thumbnail_url]
+        .filter((u: string) => ours(u))
+        .map((u: string) => deleteUpload(u).catch(() => {})),
+    );
+  }
   return NextResponse.json({ ok: true });
 }

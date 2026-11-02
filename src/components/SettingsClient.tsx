@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
+import type { StorageInfo } from '@/lib/storage';
 
 const FIELDS: { section: string; key: string; label: string; placeholder?: string; help?: string; type?: string }[] = [
   { section: 'Studio', key: 'studio_name', label: 'Studio / brand name', placeholder: 'PROJECT 1' },
@@ -64,7 +65,7 @@ export default function SettingsClient({
 }: {
   settings: Record<string, string>;
   smtp: boolean;
-  storage: string;
+  storage: StorageInfo;
   paystack: string;
   whatsapp?: string;
 }) {
@@ -242,14 +243,44 @@ export default function SettingsClient({
               <div className="text-[10px] font-bold uppercase tracking-[.16em] text-white/35">
                 File storage
               </div>
-              <p className="mt-1.5 text-[12px] text-white/45">
-                Currently using <b className="text-white/70">{storage}</b>. Set{' '}
-                <code className="text-white/70">S3_BUCKET</code>,{' '}
-                <code className="text-white/70">S3_ACCESS_KEY_ID</code>,{' '}
-                <code className="text-white/70">S3_SECRET_ACCESS_KEY</code> and{' '}
-                <code className="text-white/70">S3_ENDPOINT</code> in .env to switch uploads to
-                S3-compatible storage.
-              </p>
+              {storage.mode === 's3' ? (
+                <p className="mt-1.5 text-[12px] text-white/45">
+                  Using <b className="text-emerald-300">S3-compatible object storage</b> — bucket{' '}
+                  <code className="text-white/70">{storage.bucket}</code>
+                  {storage.endpoint ? (
+                    <>
+                      {' '}
+                      at <code className="text-white/70">{storage.endpoint}</code>
+                    </>
+                  ) : (
+                    ''
+                  )}
+                  .{' '}
+                  {storage.access === 'public-url'
+                    ? 'Objects are read from their public URL.'
+                    : 'Bucket is private — every read is a short-lived presigned link served by /api/media/…, so previews, covers and paid downloads all work without exposing the bucket.'}{' '}
+                  Links are signed for {Math.round(storage.signedTtl / 60)} min (
+                  <code className="text-white/70">S3_SIGNED_TTL</code>).
+                </p>
+              ) : (
+                <p className="mt-1.5 text-[12px] text-white/45">
+                  Currently using <b className="text-white/70">local disk</b> (public/uploads, or the
+                  temp dir on serverless). To store uploads in real object storage, set{' '}
+                  <code className="text-white/70">S3_BUCKET</code>,{' '}
+                  <code className="text-white/70">S3_ACCESS_KEY_ID</code>,{' '}
+                  <code className="text-white/70">S3_SECRET_ACCESS_KEY</code>
+                  {` and `}
+                  <code className="text-white/70">S3_ENDPOINT</code> in .env — works with AWS S3,
+                  Cloudflare R2, MinIO, Backblaze B2… For a Neon Storage bucket declared in{' '}
+                  <code className="text-white/70">neon.ts</code>, <code className="text-white/70">neon deploy</code>{' '}
+                  injects <code className="text-white/70">AWS_ACCESS_KEY_ID</code>,{' '}
+                  <code className="text-white/70">AWS_SECRET_ACCESS_KEY</code>,{' '}
+                  <code className="text-white/70">AWS_ENDPOINT_URL_S3</code> and{' '}
+                  <code className="text-white/70">AWS_REGION</code> automatically — just also set{' '}
+                  <code className="text-white/70">S3_BUCKET=assets</code>. Private buckets are fine:
+                  reads are presigned.
+                </p>
+              )}
             </div>
           )}
         </section>
