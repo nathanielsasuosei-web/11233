@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import path from 'node:path';
 import { get, run } from '@/lib/db';
-import { readLocalUpload } from '@/lib/storage';
+import { keyFromUrl, presignGet, readUpload, storageMode } from '@/lib/storage';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,25 +43,45 @@ export async function GET(_req: Request, { params }: { params: { token: string }
     .replace(/[^a-z0-9]+/gi, '-')
     .toLowerCase()}${path.extname(fileUrl) || '.mp3'}`;
 
-  // Locally stored files are streamed with an attachment header.
-  if (fileUrl.startsWith('/uploads/')) {
-    const data = await readLocalUpload(fileUrl);
-    if (!data) {
-      return new NextResponse('File is missing on the server.', { status: 404 });
+  const ext = path.extname(fileUrl).toLowerCase();
+  const contentType =
+    ext === '.wav'
+      ? 'audio/wav'
+      : ext === '.mp3'
+        ? 'audio/mpeg'
+        : ext === '.ogg'
+          ? 'audio/ogg'
+          : ext === '.flac'
+            ? 'audio/flac'
+            : ext === '.m4a'
+              ? 'audio/mp4'
+              : 'application/octet-stream';
+
+  // Object storage: hand off to a presigned URL that forces the attachment
+  // download — works for private buckets and keeps large masters off this
+  // serverless function's response body.
+  const key = keyFromUrl(fileUrl);
+  if (key && storageMode() === 's3') {
+    try {
+      const signed = await presignGet(key, {
+        disposition: `attachment; filename="${filename}"`,
+      });
+      return NextResponse.redirect(signed, 302);
+    } catch (err) {
+      console.error('[download] presign failed, streaming instead:', err);
     }
-    return new NextResponse(new Uint8Array(data), {
-      headers: {
-        'Content-Type': fileUrl.endsWith('.wav')
-          ? 'audio/wav'
-          : fileUrl.endsWith('.mp3')
-            ? 'audio/mpeg'
-            : 'application/octet-stream',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Cache-Control': 'no-store',
-      },
-    });
   }
 
-  // Cloud storage: hand off to the object URL.
-  return NextResponse.redirect(fileUrl, 302);
+  // Local disk (or presign fallback): stream the bytes with an attachment header.
+  const data = await readUpload(fileUrl);
+  if (!data) {
+    return new NextResponse('File is missing on the server.', { status: 404 });
+  }
+  return new NextResponse(new Uint8Array(data), {
+    headers: {
+      'Content-Type': contentType,
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store',
+    },
+  });
 }

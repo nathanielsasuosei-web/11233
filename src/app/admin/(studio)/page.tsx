@@ -5,7 +5,7 @@ import { ordersWithItems } from '@/lib/queries';
 import { buildWhatsAppUrl, formatMoney, timeAgo } from '@/lib/utils';
 import { paystackMode } from '@/lib/paystack';
 import { smtpConfigured as mailConfigured } from '@/lib/mailer';
-import { storageMode } from '@/lib/storage';
+import { storageInfo } from '@/lib/storage';
 import { listUpcomingBookings } from '@/lib/studio';
 import { producerWhatsAppRaw, whatsappCountryCode, whatsappEnabled } from '@/lib/whatsapp';
 
@@ -14,6 +14,7 @@ export const metadata = { title: 'Producer dashboard — Project 1' };
 
 export default function AdminHome() {
   const symbol = getSetting('currency_symbol') || 'GH₵';
+  const storage = storageInfo();
   const waPhone = producerWhatsAppRaw();
   const cc = whatsappCountryCode();
 
@@ -70,8 +71,10 @@ export default function AdminHome() {
     },
     {
       label: 'Storage',
-      ok: storageMode() === 's3',
-      on: 'S3-compatible object storage',
+      ok: storage.mode === 's3',
+      on: storage.mode === 's3'
+        ? `Object storage — ${storage.bucket}${storage.endpoint ? ` @ ${storage.endpoint}` : ''} (${storage.access === 'public-url' ? 'public URLs' : 'private, presigned'})`
+        : 'Object storage',
       off: 'Local disk storage (public/uploads, or temp dir on serverless)',
       href: '/admin/settings#storage',
     },
